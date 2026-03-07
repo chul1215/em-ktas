@@ -1,5 +1,5 @@
 const DASHBOARD_DATA = {
-  kpiTargets: { 1: 100, 2: 100, 3: 93, 4: 75, 5: 20 },
+  kpiTargets: { 1: 100, 2: 100, 3: 96, 4: 80, 5: 30 },
   ktasLabels: { 1: '소생', 2: '긴급', 3: '응급', 4: '준응급', 5: '비응급' },
   ktasColors: {
     1: '#E74C3C', 2: '#F39C12', 3: '#2E6EB5', 4: '#5BA0D9', 5: '#95A5A6'
@@ -41,16 +41,15 @@ const DASHBOARD_DATA = {
       5: { visits: 21, labPrescribed: 12, currentLabRate: 57.1 }
     },
     revenue: {
-      1: { basic: { current: 3426983, kpi: 2537120 }, admission: { current: 1843004, kpi: 2085300 }, surgery: { current: 1843004, kpi: 2528640 } },
-      2: { basic: { current: 71061613, kpi: 48998130 }, admission: { current: 56811613, kpi: 85497300 }, surgery: { current: 56811613, kpi: 103674240 } },
-      3: { basic: { current: 690638233, kpi: 620960120 }, admission: { current: 379215853, kpi: 730550100 }, surgery: { current: 379215853, kpi: 885866880 } },
-      4: { basic: { current: 80788315, kpi: 75796460 }, admission: { current: 13869035, kpi: 32322150 }, surgery: { current: 13869035, kpi: 39193920 } },
-      5: { basic: { current: 1842110, kpi: 634280 }, admission: { current: 517606, kpi: 1042650 }, surgery: { current: 517606, kpi: 1264320 } }
+      1: { outpatient: { current: 1583979, kpi: 1585700 }, admission: { current: 1843004, kpi: 2528640 } },
+      2: { outpatient: { current: 14250000, kpi: 10148480 }, admission: { current: 56811613, kpi: 104938560 } },
+      3: { outpatient: { current: 311422380, kpi: 349513651 }, admission: { current: 379215853, kpi: 911595360 } },
+      4: { outpatient: { current: 66919280, kpi: 76494168 }, admission: { current: 13869035, kpi: 40036800 } },
+      5: { outpatient: { current: 1842110, kpi: 1141704 }, admission: { current: 0, kpi: 0 } }
     },
     revenueTotals: {
-      basic: { current: 847757254, kpi: 748926110, diff: -98831144, rate: -11.7 },
-      admission: { current: 452257111, kpi: 851497500, diff: 399240389, rate: 88.3 },
-      surgery: { current: 452257111, kpi: 1032528000, diff: 580270889, rate: 128.3 }
+      outpatient: { current: 396017749, kpi: 438883703, diff: -42865954, rate: -9.8 },
+      admission: { current: 451739505, kpi: 1059099360, diff: -607359855, rate: -57.3 }
     },
     doctors: [
       { name: '전가람', patients: 902, avgOrders: 46, avgRevenue: 193319, medianRevenue: 199512, basicLabAvg: 40.6, ktasRates: { 1: 100.0, 2: 100.0, 3: 98.8, 4: 97.2, 5: 100.0 }, totalRate: 98.7 },
@@ -90,13 +89,13 @@ const DASHBOARD_DATA = {
     roomi: {
       summary: `<p>대전선병원 응급실은 <strong>기본검사 처방율 94.0%</strong>로, 전국 응급실 평균 대비 매우 높은 수준을 유지하고 있다. 이는 표준화된 오더세트 운영과 EM 의사 7명의 균일한 처방 패턴(환자당 40~46건)에 기인한다.</p>
 <p>그러나 이 높은 처방율은 <strong>양날의 검</strong>이다. 수익 확보에는 긍정적이나, KTAS 등급별 차별화 부재로 인한 HIRA 적정성 심사 리스크가 상존한다.</p>
-<p>KTAS 3등급이 전체 수익의 <strong>81.5%</strong>를 차지하는 절대적 핵심 구간이며, KTAS 5등급(57.1%)은 KPI 목표(20%) 대비 과도하게 높아 과잉처방 경고 대상이다.</p>
+<p>KTAS 3등급이 전체 수익의 <strong>81.5%</strong>를 차지하는 절대적 핵심 구간이며, KTAS 5등급(57.1%)은 KPI 목표(30%) 대비 과도하게 높아 과잉처방 경고 대상이다.</p>
 <p><strong>핵심 판단:</strong> 기본검사 처방율은 이미 천정에 가깝다. 수익 향상의 본질은 <em>입원환자 추가검사 패키지 표준화</em>에 있다.</p>`,
       recommendations: [
-        { priority: 1, title: 'KTAS 3 입원환자 추가검사 표준화', effect: '+3.51억원/6개월', difficulty: '중', risk: '낮음', desc: '입원환자 2,102건 대상 체계적 검사 패키지 적용. 전체 수익 향상의 88%를 차지하는 최우선 과제.' },
-        { priority: 2, title: 'KTAS 2 입원환자 추가검사 표준화', effect: '+0.29억원/6개월', difficulty: '중', risk: '낮음', desc: '입원율 79.6%의 중증환자 대상. 입원 전환 시 추가검사 패키지 적용.' },
+        { priority: 1, title: 'KTAS 3 입원환자 추가검사 표준화', effect: '+5.32억원/6개월', difficulty: '중', risk: '낮음', desc: '입원환자 2,164건 × 421,440원 대상 체계적 검사 패키지 적용. 전체 수익 향상의 88%를 차지하는 최우선 과제.' },
+        { priority: 2, title: 'KTAS 2 입원환자 추가검사 표준화', effect: '+0.48억원/6개월', difficulty: '중', risk: '낮음', desc: '입원율 79.6%의 중증환자 대상. 입원 전환 시 추가검사 패키지 적용.' },
         { priority: 3, title: 'KTAS 4 경량 오더세트 도입', effect: '삭감방지', difficulty: '중', risk: '리스크 감소', desc: 'CBC, 전해질, 기본 생화학(15~20개)으로 구성된 축소 세트 도입.' },
-        { priority: 4, title: 'KTAS 5 기본lab 자동오더 해제', effect: '삭감방지', difficulty: '하', risk: '리스크 감소', desc: '비응급 환자 57.1% → 20% 목표. EMR 경고 팝업 도입.' },
+        { priority: 4, title: 'KTAS 5 기본lab 자동오더 해제', effect: '삭감방지', difficulty: '하', risk: '리스크 감소', desc: '비응급 환자 57.1% → 30% 목표. EMR 경고 팝업 도입.' },
         { priority: 5, title: '입원 예측 환자 사전 추가검사', effect: '+α', difficulty: '상', risk: '낮음', desc: 'KTAS 2 입원율 79.6% 활용, 사전적 입원추가 검사로 중복 채혈 감소.' }
       ],
       roadmap: {
@@ -105,9 +104,9 @@ const DASHBOARD_DATA = {
         phase3: { title: '중기 실행 (3~6개월)', items: ['파일럿 결과 기반 KTAS 4 경량 오더세트 전면 적용', 'KPI 달성률 기반 의사별 피드백 시스템 운영', 'HIRA 적정성 평가 대비 자체 사전심사 체계 구축'] }
       },
       risks: [
-        { item: 'KTAS 5 과잉검사', level: '높음', current: '57.1% (KPI 20%)', amount: '~920만원' },
-        { item: 'KTAS 4 과잉검사', level: '중간', current: '85.6% (KPI 75%)', amount: '~8,079만원' },
-        { item: 'KTAS 3 일괄처방', level: '낮음', current: '95.3% (KPI 93%)', amount: '-' },
+        { item: 'KTAS 5 과잉검사', level: '높음', current: '57.1% (KPI 30%)', amount: '~920만원' },
+        { item: 'KTAS 4 과잉검사', level: '낮음', current: '85.6% (KPI 80%)', amount: '~8,079만원' },
+        { item: 'KTAS 3 일괄처방', level: '낮음', current: '95.3% (KPI 96%)', amount: '-' },
         { item: '의사 간 편차', level: '낮음', current: '최대 16.8%', amount: '-' }
       ],
       benchmark: '도현수 (KTAS 4: 76.7%, KTAS 5: 20.0%)'
@@ -143,16 +142,15 @@ const DASHBOARD_DATA = {
       5: { visits: 76, labPrescribed: 55, currentLabRate: 72.4 }
     },
     revenue: {
-      1: { basic: { current: 25559240, kpi: 14112730 }, admission: { current: 19844740, kpi: 15987300 }, surgery: { current: 19844740, kpi: 19386240 } },
-      2: { basic: { current: 160928307, kpi: 88006350 }, admission: { current: 131338292, kpi: 138672450 }, surgery: { current: 131338292, kpi: 168154560 } },
-      3: { basic: { current: 959131538, kpi: 904324710 }, admission: { current: 502058373, kpi: 866442150 }, surgery: { current: 502058373, kpi: 1050649920 } },
-      4: { basic: { current: 143269410, kpi: 162058540 }, admission: { current: 9908860, kpi: 18767700 }, surgery: { current: 9908860, kpi: 22757760 } },
-      5: { basic: { current: 7509740, kpi: 2378550 }, admission: { current: 306370, kpi: 347550 }, surgery: { current: 306370, kpi: 421440 } }
+      1: { outpatient: { current: 5714500, kpi: 6977080 }, admission: { current: 19844740, kpi: 19386240 } },
+      2: { outpatient: { current: 29590015, kpi: 31872570 }, admission: { current: 131338292, kpi: 168576000 } },
+      3: { outpatient: { current: 457073165, kpi: 754742458 }, admission: { current: 502058373, kpi: 1061607360 } },
+      4: { outpatient: { current: 133360550, kpi: 241153256 }, admission: { current: 9908860, kpi: 23179200 } },
+      5: { outpatient: { current: 7509740, kpi: 6136659 }, admission: { current: 0, kpi: 0 } }
     },
     revenueTotals: {
-      basic: { current: 1296398235, kpi: 1170880880, diff: -125517355, rate: -9.7 },
-      admission: { current: 663456635, kpi: 1040217150, diff: 376760515, rate: 56.8 },
-      surgery: { current: 663456635, kpi: 1261369920, diff: 597913285, rate: 90.1 }
+      outpatient: { current: 633247970, kpi: 1040882023, diff: -407634053, rate: -39.2 },
+      admission: { current: 663150265, kpi: 1272748800, diff: -609598535, rate: -47.9 }
     },
     doctors: [
       { name: '김건동', patients: 965, avgOrders: 43, avgRevenue: 173030, medianRevenue: 152164, basicLabAvg: 37.6, ktasRates: { 1: 100.0, 2: 100.0, 3: 99.2, 4: 96.0, 5: 75.0 }, totalRate: 98.5 },
@@ -194,13 +192,13 @@ const DASHBOARD_DATA = {
     ],
     roomi: {
       summary: `<p>유성선병원 응급실은 6개월간 <strong>10,253건의 내원, 총 15.3억원의 검사 수익</strong>을 기록하며, 대전선병원(5,512건, 9.7억원) 대비 약 1.86배의 규모를 보이고 있다.</p>
-<p>그러나 규모가 큰 만큼 <strong>리스크도 비례하여 크다.</strong> 특히 KTAS 5등급 처방율 72.4%(KPI 20%), KTAS 4등급 처방율 80.6%(KPI 75%)는 대전선병원보다 과잉처방 수준이 심각하다.</p>
+<p>그러나 규모가 큰 만큼 <strong>리스크도 비례하여 크다.</strong> 특히 KTAS 5등급 처방율 72.4%(KPI 30%), KTAS 4등급 처방율 80.6%(KPI 80%)는 대전선병원보다 과잉처방 수준이 심각하다.</p>
 <p>내원건당 평균금액(149,317원)이 대전(175,228원)보다 <strong>14.8% 낮아</strong>, 환자수 1.86배인데 수익은 1.59배에 그치고 있다. 건당 수익 효율성 개선이 핵심 과제이다.</p>
 <p><strong>핵심 판단:</strong> 유성은 '양(量)의 성장'에서 '질(質)의 성장'으로 전환해야 한다. 내원건수는 충분하다. <em>건당 수익을 대전 수준으로 끌어올리는 것</em>이 핵심이다.</p>`,
       recommendations: [
-        { priority: 1, title: 'KTAS 3 입원환자 추가검사 표준화', effect: '+3.64억원/6개월', difficulty: '중', risk: '낮음', desc: 'KTAS 3 입원환자 2,493건 대상. 전체 수익 향상의 최대 기여 항목.' },
-        { priority: 2, title: 'KTAS 5 과잉처방 즉각 시정', effect: '삭감방지 (~750만원)', difficulty: '하', risk: '리스크 대폭 감소', desc: '72.4% → 20% 목표. 4명의 의사가 100% 처방 중으로 즉각 교정 필요.' },
-        { priority: 3, title: 'KTAS 4 경량 오더세트 도입', effect: '삭감방지 (~2,865만원)', difficulty: '중', risk: '리스크 감소', desc: '1,956건 규모. 입원율 2.8%에 80.6% 기본lab 적용은 과잉.' },
+        { priority: 1, title: 'KTAS 3 입원환자 추가검사 표준화', effect: '+5.60억원/6개월', difficulty: '중', risk: '낮음', desc: 'KTAS 3 입원환자 2,519건 × 421,440원 대상. 전체 수익 향상의 최대 기여 항목.' },
+        { priority: 2, title: 'KTAS 5 과잉처방 즉각 시정', effect: '삭감방지 (~750만원)', difficulty: '하', risk: '리스크 대폭 감소', desc: '72.4% → 30% 목표. 4명의 의사가 100% 처방 중으로 즉각 교정 필요.' },
+        { priority: 3, title: 'KTAS 3 외래 처방율 보완', effect: '삭감방지 (~2,865만원)', difficulty: '중', risk: '리스크 감소', desc: '93.8%→96%. 외래환자 기본lab 처방 누락 방지.' },
         { priority: 4, title: '의사 간 처방 편차 축소', effect: '건당 수익 +5~10%', difficulty: '상', risk: '리스크 감소', desc: '편차 32.6% → 20% 이내 축소 목표. 류승우(197,001원) vs 민동규(148,564원).' },
         { priority: 5, title: '내원건당 수익 제고 (대전 벤치마크)', effect: '+2.6억원/6개월', difficulty: '상', risk: '중간', desc: '149,317원 → 175,228원(대전 수준) 달성 시 10,253건 × 25,911원 추가.' }
       ],
@@ -210,9 +208,9 @@ const DASHBOARD_DATA = {
         phase3: { title: '중기 실행 (3~6개월)', items: ['KTAS 4 경량 오더세트 전면 적용', '대전-유성 간 처방 패턴 교차 벤치마킹 정례화', '의사 간 편차 32.6% → 20% 이내로 축소'] }
       },
       risks: [
-        { item: 'KTAS 5 과잉검사', level: '매우 높음', current: '72.4% (KPI 20%)', amount: '~750만원' },
-        { item: 'KTAS 4 과잉검사', level: '높음', current: '80.6% (KPI 75%)', amount: '~2,865만원' },
-        { item: 'KTAS 3 일괄처방', level: '낮음', current: '93.8% (KPI 93%)', amount: '-' },
+        { item: 'KTAS 5 과잉검사', level: '매우 높음', current: '72.4% (KPI 30%)', amount: '~750만원' },
+        { item: 'KTAS 4 과잉검사', level: '낮음', current: '80.6% (KPI 80%)', amount: '-' },
+        { item: 'KTAS 3 일괄처방', level: '낮음', current: '93.8% (KPI 96%)', amount: '-' },
         { item: '의사 간 편차', level: '중간', current: '최대 32.6%', amount: '불확실' }
       ],
       benchmark: '박현욱 (KTAS 4: 83.9%, KTAS 5: 42.9%)'
