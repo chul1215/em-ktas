@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EM-KTAS 응급실 검사처방 분석 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F0F2F5;color:#2C3E50;line-height:1.5}
+/* HEADER */
+.header{background:#1B2A4A;color:#fff;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header-logo{font-size:18px;font-weight:700;display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:#2E6EB5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.hospital-switch{display:flex;background:rgba(255,255,255,.1);border-radius:8px;overflow:hidden}
+.hospital-switch button{padding:8px 28px;border:none;background:transparent;color:rgba(255,255,255,.5);font-size:14px;font-weight:600;cursor:pointer;transition:all .3s}
+.hospital-switch button.active{background:#2E6EB5;color:#fff}
+.hospital-switch button:hover:not(.active){color:rgba(255,255,255,.85)}
+.header-period{font-size:13px;color:rgba(255,255,255,.6)}
+/* LAYOUT */
+.dashboard{max-width:1440px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:24px}
+.row{display:grid;gap:24px}
+.row-2{grid-template-columns:1fr 1fr}
+.row-7-5{grid-template-columns:7fr 5fr}
+.row-full{grid-template-columns:1fr}
+/* CARD */
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:24px;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#1B2A4A;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1B2A4A;display:flex;align-items:center;justify-content:space-between}
+/* KPI CARDS */
+.kpi-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.kpi-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:20px;border-left:4px solid;transition:transform .2s,box-shadow .2s}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.kpi-card:nth-child(1){border-left-color:#2E6EB5}
+.kpi-card:nth-child(2){border-left-color:#27AE60}
+.kpi-card:nth-child(3){border-left-color:#F39C12}
+.kpi-card:nth-child(4){border-left-color:#8E44AD}
+.kpi-card:nth-child(5){border-left-color:#E74C3C}
+.kpi-label{font-size:12px;color:#7F8C8D;font-weight:600;margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:800;color:#1B2A4A;line-height:1.2}
+.kpi-sub{font-size:12px;color:#7F8C8D;margin-top:4px}
+/* TABS */
+.tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid #E0E0E0}
+.tab-btn{padding:8px 16px;border:none;background:transparent;color:#7F8C8D;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.tab-btn.active{color:#1B2A4A;border-bottom-color:#2E6EB5}
+.tab-btn:hover:not(.active){color:#2C3E50}
+.tab-content{display:none}
+.tab-content.active{display:block}
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table thead th{background:#F8F9FA;padding:10px 12px;text-align:left;font-weight:700;color:#1B2A4A;border-bottom:2px solid #E0E0E0;white-space:nowrap}
+.data-table th.c,.data-table td.c{text-align:center}
+.data-table th.r,.data-table td.r{text-align:right}
+.data-table tbody td{padding:10px 12px;border-bottom:1px solid #F0F0F0}
+.data-table tbody tr:hover{background:#F8FAFE}
+.data-table tbody tr.total-row{font-weight:700;background:#F8F9FA;border-top:2px solid #E0E0E0}
+/* HEATMAP */
+.hm{padding:4px 8px;border-radius:4px;text-align:center;font-weight:600;font-size:12px;display:inline-block;min-width:54px}
+.hm-g{background:#D5F5E3;color:#1E8449}
+.hm-r{background:#FADBD8;color:#C0392B}
+.hm-o{background:#FDEBD0;color:#D35400}
+.hm-x{background:#EAECEE;color:#7F8C8D}
+/* GAUGE */
+.gauge{height:8px;background:#EAECEE;border-radius:4px;position:relative;margin-top:6px}
+.gauge-fill{height:100%;border-radius:4px;transition:width .6s}
+.gauge-target{position:absolute;top:-4px;width:2px;height:16px;background:#1B2A4A;border-radius:1px}
+/* STATUS */
+.st{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.st-ok{background:#D5F5E3;color:#1E8449}
+.st-warn{background:#FDEBD0;color:#D35400}
+.st-bad{background:#FADBD8;color:#C0392B}
+/* REVENUE */
+.rv-pos{color:#27AE60;font-weight:700}
+.rv-neg{color:#E74C3C;font-weight:700}
+.rv-summary{display:flex;align-items:center;gap:16px;padding:16px;background:#F8F9FA;border-radius:8px;margin-top:16px}
+.rv-summary .lbl{font-weight:700;min-width:80px;font-size:12px;color:#7F8C8D}
+.rv-summary .amt{font-size:22px;font-weight:800;color:#1B2A4A}
+.rv-summary .diff{font-size:14px;font-weight:700;margin-left:12px}
+/* CHART */
+.chart-container{position:relative;width:100%}
+.chart-container canvas{width:100%!important}
+.donut-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.donut-center{position:absolute;text-align:center;pointer-events:none}
+.donut-center .amt{font-size:18px;font-weight:800;color:#1B2A4A}
+.donut-center .lbl{font-size:11px;color:#7F8C8D}
+/* ROOMI */
+.roomi-card{border-left:4px solid #2E6EB5}
+.roomi-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.roomi-avatar{width:48px;height:48px;background:linear-gradient(135deg,#1B2A4A,#2E6EB5);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0}
+.roomi-hdr-text h3{font-size:16px;color:#1B2A4A}
+.roomi-hdr-text p{font-size:12px;color:#7F8C8D}
+.roomi-body{font-size:13px;line-height:1.8}
+.roomi-body p{margin-bottom:10px}
+.roomi-body strong{color:#1B2A4A}
+.roomi-body em{color:#2E6EB5;font-style:normal;font-weight:600}
+/* RECS */
+.rec-list{display:flex;flex-direction:column;gap:10px}
+.rec-item{display:flex;gap:12px;padding:12px;background:#F8F9FA;border-radius:8px;align-items:flex-start}
+.rec-num{width:26px;height:26px;background:#2E6EB5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.rec-body{flex:1}
+.rec-title{font-weight:700;font-size:13px;margin-bottom:2px}
+.rec-desc{font-size:12px;color:#7F8C8D}
+.rec-meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.rec-tag{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
+.rec-tag.eff{background:#D5F5E3;color:#1E8449}
+.rec-tag.dif{background:#EBF5FB;color:#2E6EB5}
+.rec-tag.rsk{background:#FDEBD0;color:#D35400}
+/* ROADMAP */
+.roadmap{display:flex;flex-direction:column;gap:20px}
+.rm-phase{position:relative;padding-left:24px}
+.rm-phase::before{content:'';position:absolute;left:7px;top:28px;bottom:-20px;width:2px;background:#E0E0E0}
+.rm-phase:last-child::before{display:none}
+.rm-dot{width:16px;height:16px;border-radius:50%;position:absolute;left:0;top:3px}
+.rm-phase:nth-child(1) .rm-dot{background:#E74C3C}
+.rm-phase:nth-child(2) .rm-dot{background:#F39C12}
+.rm-phase:nth-child(3) .rm-dot{background:#2E6EB5}
+.rm-title{font-weight:700;font-size:13px;margin-bottom:8px;color:#1B2A4A}
+.rm-items{list-style:none;display:flex;flex-direction:column;gap:4px}
+.rm-items li{font-size:12px;color:#5D6D7E;padding-left:16px;position:relative}
+.rm-items li::before{content:'—';position:absolute;left:0;color:#BDC3C7}
+/* RISK */
+.risk-list{display:flex;flex-direction:column;gap:12px}
+.risk-item{padding:12px;border-radius:8px;background:#F8F9FA}
+.risk-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.risk-name{font-weight:700;font-size:13px}
+.risk-lv{font-size:11px;padding:2px 10px;border-radius:12px;font-weight:700}
+.risk-lv.high,.risk-lv.very-high{background:#FADBD8;color:#C0392B}
+.risk-lv.medium{background:#FDEBD0;color:#D35400}
+.risk-lv.low{background:#D5F5E3;color:#1E8449}
+.risk-bar{height:6px;background:#EAECEE;border-radius:3px;overflow:hidden}
+.risk-bar-fill{height:100%;border-radius:3px;transition:width .6s}
+.risk-detail{display:flex;justify-content:space-between;font-size:11px;color:#7F8C8D;margin-top:4px}
+/* CATEGORY */
+.cat{font-size:10px;padding:1px 6px;border-radius:3px;font-weight:600;background:#EBF5FB;color:#2E6EB5}
+.cat-심장{background:#FADBD8;color:#C0392B}
+.cat-감염{background:#FDEBD0;color:#D35400}
+.cat-신경{background:#E8DAEF;color:#8E44AD}
+.cat-응고{background:#D5F5E3;color:#1E8449}
+.cat-모니터링{background:#F2F3F4;color:#566573}
+/* ANIM */
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#F0F2F5}
+::-webkit-scrollbar-thumb{background:#BDC3C7;border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-icon">EM</div>
+    <span>EM-KTAS 응급실 검사처방 분석</span>
+  </div>
+  <div class="hospital-switch">
+    <button class="active" onclick="switchHospital('daejeon')">대전선병원</button>
+    <button onclick="switchHospital('yuseong')">유성선병원</button>
+  </div>
+  <div class="header-period" id="headerPeriod">2025.07 ~ 2025.12 (6개월)</div>
+</header>
+
+<div class="dashboard">
+
+  <!-- A: KPI CARDS -->
+  <div class="kpi-cards" id="kpiCards"></div>
+
+  <!-- D: DOCTOR TABLE -->
+  <div class="row row-full">
+    <div class="card">
+      <div class="card-title">의료진별 처방 현황</div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchDoctorTab('rate',this)">처방율 뷰</button>
+        <button class="tab-btn" onclick="switchDoctorTab('revenue',this)">평균금액 뷰</button>
+        <button class="tab-btn" onclick="switchDoctorTab('kpi',this)">KPI 비교 뷰</button>
+      </div>
+      <div id="doctorRateTab" class="tab-content active"></div>
+      <div id="doctorRevenueTab" class="tab-content"></div>
+      <div id="doctorKpiTab" class="tab-content">
+        <div class="chart-container" style="height:340px"><canvas id="doctorKpiChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E + F: REVENUE SCENARIO + INFOGRAPHIC -->
+  <div class="row row-2">
+    <div class="card">
+      <div class="card-title">수익 시나리오 분석</div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchRevenueTab('basic',this)">기본검사</button>
+        <button class="tab-btn" onclick="switchRevenueTab('admission',this)">입원시 검사</button>
+        <button class="tab-btn" onclick="switchRevenueTab('surgery',this)">수술시 검사</button>
+      </div>
+      <div id="revenueTable"></div>
+      <div id="revenueSummary"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">시나리오별 수익 비교</div>
+      <div id="revenueInfoPanel"></div>
+    </div>
+  </div>
+
+  <!-- G: ADDITIONAL TESTS -->
+  <div class="row row-full">
+    <div class="card">
+      <div class="card-title">추가처방 검사 현황</div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchTestTab('additional',this)">기본lab 외 추가검사</button>
+        <button class="tab-btn" onclick="switchTestTab('lowfreq',this)">저처방 검사 (&lt;50건)</button>
+        <button class="tab-btn" onclick="switchTestTab('sets',this)">입원시 추가 세트</button>
+      </div>
+      <div id="testAdditionalTab" class="tab-content active"></div>
+      <div id="testLowfreqTab" class="tab-content"></div>
+      <div id="testSetsTab" class="tab-content"></div>
+    </div>
+  </div>
+
+  <!-- H + I: ROOMI + RISK -->
+  <div class="row row-7-5">
+    <div class="card roomi-card">
+      <div class="roomi-hdr">
+        <div class="roomi-avatar">Ri</div>
+        <div class="roomi-hdr-text">
+          <h3>ROOMi 분석 견해</h3>
+          <p>적정진료관리팀 AI — <span id="roomiHospital"></span></p>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchRoomiTab('summary',this)">종합 평가</button>
+        <button class="tab-btn" onclick="switchRoomiTab('recs',this)">핵심 권고</button>
+        <button class="tab-btn" onclick="switchRoomiTab('roadmap',this)">실행 로드맵</button>
+      </div>
+      <div id="roomiSummaryTab" class="tab-content active"></div>
+      <div id="roomiRecsTab" class="tab-content"></div>
+      <div id="roomiRoadmapTab" class="tab-content"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">HIRA 삭감 리스크 분석</div>
+      <div id="riskPanel"></div>
+      <div style="margin-top:16px;padding:12px;background:#F0F2F5;border-radius:8px">
+        <div style="font-size:12px;color:#7F8C8D;margin-bottom:4px">적정처방 벤치마크 의사</div>
+        <div style="font-size:14px;font-weight:700;color:#1B2A4A" id="benchmarkDoctor"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =============== DATA =============== */
+const D = {
+  kpi: {1:100, 2:100, 3:93, 4:75, 5:20},
+  kl: {1:'소생', 2:'긴급', 3:'응급', 4:'준응급', 5:'비응급'},
+  kc: {1:'#E74C3C', 2:'#F39C12', 3:'#2E6EB5', 4:'#5BA0D9', 5:'#95A5A6'},
+  sets: {basic:{l:'응급실 기본 lab',c:158570,n:48},surgery:{l:'기본lab+입원추가(수술)',c:347550,n:56},elderly:{l:'기본lab+입원추가(고령+수술)',c:421440,n:59},mokdong:{l:'목동 기본 lab',c:205020,n:52}},
+  boldSurgery:[
+    {cd:'L7624',nm:'Free T4(나-334)',price:11500},
+    {cd:'L7605',nm:'트리요도타이로닌(T3)(나-329)',price:11500},
+    {cd:'L7606',nm:'TSH(나-336)',price:15980},
+    {cd:'L2043',nm:'TRAP TEST',price:80000},
+    {cd:'L72391',nm:'혈액점도검사[스캐닝 모세관법]',price:70000}
+  ],
+  boldElderly:[
+    {cd:'L71176',nm:'Pro-Brain Natriuretic Peptide',price:49540},
+    {cd:'L2247',nm:'D-DIMER ASSAY(정량)',price:12840},
+    {cd:'L2218',nm:'FDP TEST(정량)',price:11510}
+  ],
+  boldMokdong:[
+    {cd:'L3081',nm:'Cystatin-C(원내검사)',price:6340},
+    {cd:'L3062',nm:'HDL-CHOLESTEROL(나242)',price:6560},
+    {cd:'L3068',nm:'LDL-CHOLESTEROL(나243)',price:6580},
+    {cd:'L3069',nm:'MAGNESIUM(나379사)',price:1660},
+    {cd:'L80285',nm:'OSMOLALITY,SERUM(나380)',price:4320},
+    {cd:'L3047',nm:'혈액총이산화탄소함량(나381나)',price:4030},
+    {cd:'L3311',nm:'헤모글로빈A1C(나382마)',price:7500},
+    {cd:'L7624',nm:'Free T4(나-334)',price:11500},
+    {cd:'L7605',nm:'트리요도타이로닌(T3)(나-329)',price:11500},
+    {cd:'L7606',nm:'TSH(나-336)',price:15980},
+    {cd:'KA1514',nm:'경피적혈액산소포화도측정(1일당)',price:8950}
+  ],
+  boldMokdongAdm:[
+    {cd:'L5111',nm:'간염S항원(HBsAg)',price:12660},
+    {cd:'L5112',nm:'간염S항체(HBsAb)',price:13490},
+    {cd:'L5118',nm:'C형간염항체',price:15690},
+    {cd:'L5117',nm:'후천성면역결핍증검사(Anti-HIV)',price:10520},
+    {cd:'L7500',nm:'프리셉신(Presepsin)',price:46980},
+    {cd:'L221811',nm:'FDP TEST(정량)',price:11500},
+    {cd:'L2231',nm:'혈액점도검사[스캐닝 모세관법]',price:70000}
+  ],
+  boldMokdongElderly:[
+    {cd:'L71176',nm:'Pro-Brain Natriuretic Peptide',price:49540},
+    {cd:'L2265',nm:'D-DIMER ASSAY(정량)',price:12830},
+    {cd:'L61011',nm:'요일반검사 10종',price:2010},
+    {cd:'L6130',nm:'요침사검사(이미지분석법)',price:1320}
+  ],
+
+  daejeon: {
+    name:'대전선병원', period:'2025.07 ~ 2025.12',
+    s:{totalVisits:5512,totalPatients:5023,totalRevenue:965837380,avgRev:175228,admRate:45.7,labRate:94.0,docs:7},
+    ktas:{
+      1:{v:16,r:0.3,lp:14,lr:87.5,ar:37.5,avg:258150,med:259940,tr:4130392,ord:46.9,ac:6},
+      2:{v:313,r:5.7,lp:298,lr:96.4,ar:79.6,avg:258194,med:258692,tr:80814617,ord:52.0,ac:249},
+      3:{v:4460,r:80.9,lp:4012,lr:95.3,ar:48.5,avg:176265,med:168718,tr:786142825,ord:44.0,ac:2164},
+      4:{v:698,r:12.7,lp:545,lr:85.6,ar:13.6,avg:132528,med:129160,tr:92504641,ord:36.5,ac:95},
+      5:{v:24,r:0.4,lp:12,lr:57.1,ar:12.5,avg:92704,med:83705,tr:2224905,ord:25.2,ac:3}
+    },
+    em:{1:{v:16,lp:14,lr:87.5},2:{v:309,lp:298,lr:96.4},3:{v:4211,lp:4012,lr:95.3},4:{v:637,lp:545,lr:85.6},5:{v:21,lp:12,lr:57.1}},
+    rev:{
+      1:{basic:{c:3426983,k:2537120},adm:{c:1843004,k:2085300},sur:{c:1843004,k:2528640}},
+      2:{basic:{c:71061613,k:48998130},adm:{c:56811613,k:85497300},sur:{c:56811613,k:103674240}},
+      3:{basic:{c:690638233,k:620960120},adm:{c:379215853,k:730550100},sur:{c:379215853,k:885866880}},
+      4:{basic:{c:80788315,k:75796460},adm:{c:13869035,k:32322150},sur:{c:13869035,k:39193920}},
+      5:{basic:{c:1842110,k:634280},adm:{c:517606,k:1042650},sur:{c:517606,k:1264320}}
+    },
+    rt:{basic:{c:847757254,k:748926110,d:-98831144,r:-11.7},adm:{c:452257111,k:851497500,d:399240389,r:88.3},sur:{c:452257111,k:1032528000,d:580270889,r:128.3}},
+    docs:[
+      {n:'전가람',p:902,o:46,avg:193319,med:199512,bla:40.6,kr:{1:100,2:100,3:98.8,4:97.2,5:100},tr:98.7},
+      {n:'정용택',p:736,o:45,avg:181462,med:176969,bla:39.1,kr:{1:100,2:100,3:98.5,4:93.9,5:100},tr:98.0},
+      {n:'홍승우',p:985,o:44,avg:170487,med:151734,bla:39.5,kr:{1:100,2:100,3:97.9,4:85.0,5:60},tr:96.2},
+      {n:'양중일',p:698,o:42,avg:167923,med:155147,bla:37.6,kr:{1:100,2:97.8,3:97.9,4:91.6,5:100},tr:97.0},
+      {n:'정원익',p:802,o:42,avg:165436,med:154594,bla:36.9,kr:{1:0,2:97.7,3:97.8,4:95.6,5:100},tr:97.5},
+      {n:'도현수',p:607,o:41,avg:167875,med:167739,bla:36.3,kr:{1:0,2:100,3:96.9,4:76.7,5:20},tr:93.6},
+      {n:'주기혁',p:546,o:40,avg:165960,med:168718,bla:35.8,kr:{1:100,2:97.9,3:96.2,4:93.2,5:50},tr:96.0}
+    ],
+    addTests:[
+      {cd:'KL1102',nm:'심전도병실왕진',cnt:3361,pt:3026,cat:'심장'},
+      {cd:'KA1514',nm:'경피적혈액산소포화도측정',cnt:1733,pt:1657,cat:'모니터링'},
+      {cd:'L71176',nm:'Pro-BNP',cnt:1082,pt:1019,cat:'심장'},
+      {cd:'L7500',nm:'프리셉신(Presepsin)',cnt:1056,pt:1011,cat:'감염'},
+      {cd:'L4601',nm:'Influenza A&B',cnt:954,pt:917,cat:'감염'},
+      {cd:'L80436',nm:'COVID-19 Ag Test',cnt:928,pt:894,cat:'감염'},
+      {cd:'L0121102',nm:'일반신경학적검사',cnt:887,pt:863,cat:'신경'},
+      {cd:'L221811',nm:'FDP Test(정량)',cnt:840,pt:807,cat:'응고'},
+      {cd:'L2265',nm:'D-DIMER ASSAY(정량)',cnt:840,pt:807,cat:'응고'},
+      {cd:'L9314',nm:'심전도침상감시',cnt:838,pt:802,cat:'심장'}
+    ],
+    lowTests:[
+      {cd:'L4231',nm:'COVID+RSV+Influenza 복합',cnt:46,up:66960,t:3450000},
+      {cd:'L7606',nm:'TSH',cnt:30,up:15670,t:463420},
+      {cd:'L7624',nm:'Free T4',cnt:30,up:11270,t:333500},
+      {cd:'L7605',nm:'T3',cnt:30,up:11270,t:333500},
+      {cd:'L5159',nm:'PCT(procalcitonin)',cnt:27,up:30500,t:839970},
+      {cd:'L5155',nm:'A형간염항체(Total)',cnt:25,up:15720,t:426720},
+      {cd:'L3535',nm:'PSA',cnt:24,up:13800,t:337920},
+      {cd:'L7238',nm:'Hantaan virus Ab',cnt:11,up:15060,t:185900},
+      {cd:'L71476',nm:'O. tsutsugamushi Ab',cnt:11,up:14450,t:195910},
+      {cd:'L3069',nm:'MAGNESIUM',cnt:9,up:1660,t:15300}
+    ],
+    roomi:{
+      sum:`<p>대전선병원 응급실은 <strong>기본검사 처방율 94.0%</strong>로 매우 높은 수준을 유지하고 있다. 표준화된 오더세트 운영과 EM 의사 7명의 균일한 처방 패턴(환자당 40~46건)에 기인한다.</p><p>그러나 이 높은 처방율은 <strong>양날의 검</strong>이다. 수익 확보에는 긍정적이나, KTAS 등급별 차별화 부재로 인한 HIRA 적정성 심사 리스크가 상존한다.</p><p>KTAS 3등급이 전체 수익의 <strong>81.5%</strong>를 차지하는 절대적 핵심 구간이며, KTAS 5등급(57.1%)은 KPI 목표(20%) 대비 과도하게 높아 과잉처방 경고 대상이다.</p><p><strong>핵심 판단:</strong> 기본검사 처방율은 이미 천정에 가깝다. 수익 향상의 본질은 <em>입원환자 추가검사 패키지 표준화</em>에 있다.</p>`,
+      recs:[
+        {p:1,t:'KTAS 3 입원환자 추가검사 표준화',e:'+3.51억원',d:'중',r:'낮음',desc:'입원환자 2,102건 대상. 전체 수익 향상의 88%.'},
+        {p:2,t:'KTAS 2 입원환자 추가검사 표준화',e:'+0.29억원',d:'중',r:'낮음',desc:'입원율 79.6% 중증환자 대상.'},
+        {p:3,t:'KTAS 4 경량 오더세트 도입',e:'삭감방지',d:'중',r:'리스크↓',desc:'CBC+전해질+기본생화학 15~20개 축소세트.'},
+        {p:4,t:'KTAS 5 기본lab 자동오더 해제',e:'삭감방지',d:'하',r:'리스크↓',desc:'57.1%→20%. EMR 경고 팝업 도입.'},
+        {p:5,t:'입원 예측 환자 사전 추가검사',e:'+α',d:'상',r:'낮음',desc:'KTAS 2 입원율 79.6% 활용.'}
+      ],
+      rm:{
+        p1:{t:'즉시 실행 (1개월 내)',items:['KTAS 5 기본lab 자동오더 해제 및 경고 팝업','KTAS 3 입원환자 추가검사 세트 구축','의사별 처방율 월간 모니터링']},
+        p2:{t:'단기 실행 (1~3개월)',items:['KTAS 4 경량 오더세트 파일럿','KTAS 2 사전 추가검사 프로토콜','의사 간 처방 편차 가이드라인']},
+        p3:{t:'중기 실행 (3~6개월)',items:['KTAS 4 경량 오더세트 전면 적용','KPI 기반 의사별 피드백 시스템','HIRA 사전심사 체계 구축']}
+      },
+      risks:[
+        {n:'KTAS 5 과잉검사',lv:'높음',cur:'57.1% (KPI 20%)',amt:'~920만원',pct:80},
+        {n:'KTAS 4 과잉검사',lv:'중간',cur:'85.6% (KPI 75%)',amt:'~8,079만원',pct:50},
+        {n:'KTAS 3 일괄처방',lv:'낮음',cur:'95.3% (KPI 93%)',amt:'-',pct:15},
+        {n:'의사 간 편차',lv:'낮음',cur:'최대 16.8%',amt:'-',pct:20}
+      ],
+      bench:'도현수 (KTAS 4: 76.7%, KTAS 5: 20.0%)'
+    }
+  },
+
+  yuseong: {
+    name:'유성선병원', period:'2025.07 ~ 2025.12',
+    s:{totalVisits:10253,totalPatients:9394,totalRevenue:1530942897,avgRev:149317,admRate:29.5,labRate:91.6,docs:10},
+    ktas:{
+      1:{v:90,r:0.88,lp:80,lr:89.9,ar:51.1,avg:339345,med:330470,tr:30541091,ord:50.5,ac:46},
+      2:{v:601,r:5.86,lp:540,lr:89.9,ar:66.6,avg:308268,med:302580,tr:185269009,ord:51.0,ac:400},
+      3:{v:7477,r:72.92,lp:5758,lr:77.0,ar:33.7,avg:152464,med:146541,tr:1139973580,ord:36.7,ac:2519},
+      4:{v:1956,r:19.08,lp:1098,lr:56.1,ar:2.8,avg:84859,med:78600,tr:165983299,ord:22.7,ac:55},
+      5:{v:129,r:1.26,lp:55,lr:42.6,ar:0.8,avg:71131,med:19300,tr:9175918,ord:17.8,ac:1}
+    },
+    em:{1:{v:89,lp:80,lr:89.9},2:{v:555,lp:539,lr:97.1},3:{v:6132,lp:5754,lr:93.8},4:{v:1362,lp:1098,lr:80.6},5:{v:76,lp:55,lr:72.4}},
+    rev:{
+      1:{basic:{c:25559240,k:14112730},adm:{c:19844740,k:15987300},sur:{c:19844740,k:19386240}},
+      2:{basic:{c:160928307,k:88006350},adm:{c:131338292,k:138672450},sur:{c:131338292,k:168154560}},
+      3:{basic:{c:959131538,k:904324710},adm:{c:502058373,k:866442150},sur:{c:502058373,k:1050649920}},
+      4:{basic:{c:143269410,k:162058540},adm:{c:9908860,k:18767700},sur:{c:9908860,k:22757760}},
+      5:{basic:{c:7509740,k:2378550},adm:{c:306370,k:347550},sur:{c:306370,k:421440}}
+    },
+    rt:{basic:{c:1296398235,k:1170880880,d:-125517355,r:-9.7},adm:{c:663456635,k:1040217150,d:376760515,r:56.8},sur:{c:663456635,k:1261369920,d:597913285,r:90.1}},
+    docs:[
+      {n:'김건동',p:965,o:43,avg:173030,med:152164,bla:37.6,kr:{1:100,2:100,3:99.2,4:96.0,5:75},tr:98.5},
+      {n:'류승우',p:919,o:43,avg:197001,med:172544,bla:38.5,kr:{1:88.9,2:100,3:98.5,4:94.9,5:100},tr:97.9},
+      {n:'송경혁',p:914,o:40,avg:163687,med:136640,bla:35.8,kr:{1:93.8,2:98.4,3:99.5,4:96.2,5:100},tr:98.8},
+      {n:'이승한',p:903,o:40,avg:155154,med:127894,bla:35.9,kr:{1:88.9,2:95.3,3:99.4,4:93.8,5:100},tr:98.2},
+      {n:'안경찬',p:892,o:39,avg:156979,med:140036,bla:36.1,kr:{1:100,2:96.6,3:98.7,4:88.4,5:91.7},tr:97.0},
+      {n:'민동규',p:868,o:40,avg:148564,med:130754,bla:36.9,kr:{1:100,2:100,3:99.1,4:92.7,5:77.8},tr:97.7},
+      {n:'최윤혁',p:863,o:40,avg:159735,med:132214,bla:36.1,kr:{1:100,2:97.0,3:97.7,4:96.6,5:100},tr:97.5},
+      {n:'양의석',p:791,o:43,avg:174024,med:158064,bla:39.6,kr:{1:100,2:95.8,3:98.8,4:95.5,5:90},tr:97.9},
+      {n:'박현욱',p:736,o:41,avg:170502,med:155128,bla:38.0,kr:{1:87.5,2:98.0,3:98.8,4:83.9,5:42.9},tr:96.1},
+      {n:'한규홍',p:576,o:40,avg:150444,med:165934,bla:35.4,kr:{1:null,2:100,3:98.6,4:84.4,5:75},tr:96.1}
+    ],
+    addTests:[
+      {cd:'L3154',nm:'Pancreatic Amylase',cnt:6180,pt:6175,cat:'생화학'},
+      {cd:'L8157',nm:'LIPASE',cnt:6087,pt:6082,cat:'생화학'},
+      {cd:'KL1102',nm:'심전도병실왕진',cnt:5333,pt:5227,cat:'심장'},
+      {cd:'L8140',nm:'OSMOLALITY, SERUM',cnt:4634,pt:4632,cat:'생화학'},
+      {cd:'L5117',nm:'Anti-HIV(정밀)',cnt:3206,pt:3206,cat:'감염'},
+      {cd:'L5112',nm:'HBs Ab(Titer)',cnt:3205,pt:3205,cat:'감염'},
+      {cd:'L34131',nm:'매독반응검사 RPR정량',cnt:3202,pt:3202,cat:'감염'},
+      {cd:'L5118',nm:'C형간염항체',cnt:3200,pt:3200,cat:'감염'},
+      {cd:'L5111',nm:'HBs Ag',cnt:3199,pt:3199,cat:'감염'},
+      {cd:'L41061',nm:'미생물배양및동정',cnt:2200,pt:893,cat:'감염'}
+    ],
+    lowTests:[
+      {cd:'L7668',nm:'Anti-HBc IgM',cnt:47,up:14420,t:691370},
+      {cd:'L5155',nm:'Anti HAV Total(IgG)',cnt:39,up:15720,t:625170},
+      {cd:'L71474',nm:'Leptospira ab[MAT]',cnt:32,up:13520,t:532800},
+      {cd:'L7238',nm:'Hantaan Ab',cnt:32,up:15060,t:540800},
+      {cd:'L71476',nm:'O. tsutsugamushi Ab',cnt:31,up:14450,t:552110},
+      {cd:'L3052',nm:'TIBC',cnt:30,up:2580,t:78900},
+      {cd:'L76201',nm:'Ferritin',cnt:19,up:9570,t:185440},
+      {cd:'L3051',nm:'IRON',cnt:19,up:2580,t:49970},
+      {cd:'L2112',nm:'혈구형태(BLOOD CELL MORPHOLOGY)',cnt:15,up:9450,t:158700},
+      {cd:'L80460',nm:'CO-Oximeter',cnt:7,up:12490,t:89180}
+    ],
+    roomi:{
+      sum:`<p>유성선병원 응급실은 6개월간 <strong>10,253건의 내원, 총 15.3억원의 검사 수익</strong>을 기록하며, 대전선병원 대비 약 1.86배의 규모를 보이고 있다.</p><p>그러나 규모가 큰 만큼 <strong>리스크도 비례하여 크다.</strong> KTAS 5등급 처방율 72.4%(KPI 20%), KTAS 4등급 처방율 80.6%(KPI 75%)는 대전보다 과잉처방 수준이 심각하다.</p><p>내원건당 평균금액(149,317원)이 대전(175,228원)보다 <strong>14.8% 낮아</strong>, 환자수 1.86배인데 수익은 1.59배에 그치고 있다.</p><p><strong>핵심 판단:</strong> '양(量)의 성장'에서 '질(質)의 성장'으로 전환해야 한다. <em>건당 수익을 대전 수준으로 끌어올리는 것</em>이 핵심이다.</p>`,
+      recs:[
+        {p:1,t:'KTAS 3 입원환자 추가검사 표준화',e:'+3.64억원',d:'중',r:'낮음',desc:'입원환자 2,493건 대상. 최대 수익 기여 항목.'},
+        {p:2,t:'KTAS 5 과잉처방 즉각 시정',e:'삭감방지',d:'하',r:'리스크↓↓',desc:'72.4%→20%. 4명 의사 100% 처방 즉각 교정.'},
+        {p:3,t:'KTAS 4 경량 오더세트 도입',e:'삭감방지',d:'중',r:'리스크↓',desc:'1,956건 규모. 입원율 2.8%에 80.6% 적용은 과잉.'},
+        {p:4,t:'의사 간 처방 편차 축소',e:'+5~10%',d:'상',r:'리스크↓',desc:'편차 32.6%→20% 이내. 류승우 vs 민동규.'},
+        {p:5,t:'내원건당 수익 제고 (대전 벤치마크)',e:'+2.6억원',d:'상',r:'중간',desc:'149,317원→175,228원 달성.'}
+      ],
+      rm:{
+        p1:{t:'즉시 실행 (1개월 내)',items:['KTAS 5 기본lab 자동오더 해제 및 사유입력 의무화','KTAS 5 처방율 100% 의사 4명 개별 면담','KTAS 3 입원환자 추가검사 세트 구축']},
+        p2:{t:'단기 실행 (1~3개월)',items:['KTAS 4 경량 오더세트 설계 (대전 벤치마크)','의사별 처방율 월간 대시보드 공유','KTAS 분류 정확도 내부 감사']},
+        p3:{t:'중기 실행 (3~6개월)',items:['KTAS 4 경량 오더세트 전면 적용','대전-유성 교차 벤치마킹 정례화','의사 간 편차 32.6%→20% 축소']}
+      },
+      risks:[
+        {n:'KTAS 5 과잉검사',lv:'매우 높음',cur:'72.4% (KPI 20%)',amt:'~750만원',pct:95},
+        {n:'KTAS 4 과잉검사',lv:'높음',cur:'80.6% (KPI 75%)',amt:'~2,865만원',pct:65},
+        {n:'KTAS 3 일괄처방',lv:'낮음',cur:'93.8% (KPI 93%)',amt:'-',pct:15},
+        {n:'의사 간 편차',lv:'중간',cur:'최대 32.6%',amt:'불확실',pct:45}
+      ],
+      bench:'박현욱 (KTAS 4: 83.9%, KTAS 5: 42.9%)'
+    }
+  }
+};
+
+/* =============== STATE =============== */
+let H = 'daejeon'; // current hospital
+let revScenario = 'basic';
+let charts = {};
+
+/* =============== UTILS =============== */
+const fmt = n => n == null ? '-' : n.toLocaleString('ko-KR');
+const fmtW = n => {
+  if (Math.abs(n) >= 1e8) return (n/1e8).toFixed(1) + '억';
+  if (Math.abs(n) >= 1e4) return (n/1e4).toFixed(0) + '만';
+  return fmt(n);
+};
+const fmtPct = n => n == null ? '-' : n.toFixed(1) + '%';
+const h = D[H]; // alias, refreshed on switch
+
+function hmClass(val, ktas) {
+  const target = D.kpi[ktas];
+  if (val == null) return 'hm hm-x';
+  if (ktas >= 4 && val > target * 1.5) return 'hm hm-o';
+  if (val >= target) return 'hm hm-g';
+  return 'hm hm-r';
+}
+function riskLvClass(lv) {
+  if (lv.includes('매우')) return 'risk-lv very-high';
+  if (lv === '높음') return 'risk-lv high';
+  if (lv === '중간') return 'risk-lv medium';
+  return 'risk-lv low';
+}
+function riskBarColor(pct) {
+  if (pct >= 70) return '#E74C3C';
+  if (pct >= 40) return '#F39C12';
+  return '#27AE60';
+}
+
+/* =============== RENDER FUNCTIONS =============== */
+
+function renderKPI() {
+  const s = D[H].s;
+  document.getElementById('kpiCards').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">총 내원건수</div><div class="kpi-value">${fmt(s.totalVisits)}<span style="font-size:14px">건</span></div><div class="kpi-sub">월평균 ${fmt(Math.round(s.totalVisits/6))}건 · 고유환자 ${fmt(s.totalPatients)}명</div></div>
+    <div class="kpi-card"><div class="kpi-label">기본lab 처방율</div><div class="kpi-value">${s.labRate}%</div><div class="kpi-sub">EM 의사 ${s.docs}명 기준</div></div>
+    <div class="kpi-card"><div class="kpi-label">내원건당 평균금액</div><div class="kpi-value">${fmt(s.avgRev)}<span style="font-size:14px">원</span></div><div class="kpi-sub">총 수익 ${fmtW(s.totalRevenue)}원</div></div>
+    <div class="kpi-card"><div class="kpi-label">총 검사수익 (6개월)</div><div class="kpi-value">${(s.totalRevenue/1e8).toFixed(1)}<span style="font-size:14px">억원</span></div><div class="kpi-sub">기본lab 158,570원/건 기준</div></div>
+    <div class="kpi-card"><div class="kpi-label">입원율</div><div class="kpi-value">${s.admRate}%</div><div class="kpi-sub">전체 ${fmt(s.totalVisits)}건 중</div></div>`;
+}
+
+function renderDoctorRate() {
+  const docs = D[H].docs;
+  let hdr = '<th>의사명</th><th class="c">환자수</th>';
+  for (let k=1; k<=5; k++) hdr += `<th class="c">KTAS ${k}<br><span style="font-size:10px;color:#7F8C8D">KPI ${D.kpi[k]}%</span></th>`;
+  hdr += '<th class="c">전체</th>';
+  let rows = docs.map(d => {
+    let r = `<tr><td class="bold">${d.n}</td><td class="c">${fmt(d.p)}</td>`;
+    for (let k=1; k<=5; k++) {
+      const v = d.kr[k];
+      r += `<td class="c"><span class="${hmClass(v,k)}">${v==null?'-':v.toFixed(1)}%</span></td>`;
+    }
+    r += `<td class="c"><strong>${d.tr.toFixed(1)}%</strong></td></tr>`;
+    return r;
+  }).join('');
+  document.getElementById('doctorRateTab').innerHTML = `<table class="data-table"><thead><tr>${hdr}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderDoctorRevenue() {
+  const docs = D[H].docs;
+  const avgAll = docs.reduce((s,d)=>s+d.avg,0)/docs.length;
+  let rows = docs.map(d => {
+    const pct = (d.avg/avgAll*100).toFixed(0);
+    const barW = Math.min((d.avg/docs.reduce((m,x)=>Math.max(m,x.avg),0))*100, 100);
+    return `<tr><td class="bold">${d.n}</td><td class="r">${fmt(d.p)}</td><td class="r">${fmt(d.avg)}원</td><td class="r">${fmt(d.med)}원</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:#EAECEE;border-radius:3px"><div style="height:100%;width:${barW}%;background:${d.avg>=avgAll?'#2E6EB5':'#E74C3C'};border-radius:3px"></div></div><span style="font-size:11px;font-weight:600">${pct}%</span></div></td>
+      <td class="c">${d.o}건</td><td class="r">${d.bla.toFixed(1)}건</td></tr>`;
+  }).join('');
+  document.getElementById('doctorRevenueTab').innerHTML = `<div style="font-size:12px;color:#7F8C8D;margin-bottom:8px">전체 평균: ${fmt(Math.round(avgAll))}원</div>
+    <table class="data-table"><thead><tr><th>의사명</th><th class="r">환자수</th><th class="r">평균금액</th><th class="r">중앙값</th><th style="min-width:160px">평균 대비</th><th class="c">평균 처방수</th><th class="r">기본lab 평균</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderDoctorKpi() {
+  const docs = D[H].docs;
+  const ctx = document.getElementById('doctorKpiChart');
+  if (charts.docKpi) charts.docKpi.destroy();
+  charts.docKpi = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: docs.map(d => d.n),
+      datasets: [
+        { label: '현재 환자당 평균금액', data: docs.map(d => d.avg), backgroundColor: '#2E6EB5', borderRadius: 4 },
+        { label: '병원 평균', data: docs.map(() => D[H].s.avgRev), type: 'line', borderColor: '#E74C3C', borderDash: [5,5], pointRadius: 0, borderWidth: 2, fill: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: false, ticks: { callback: v => (v/10000).toFixed(0)+'만' } }, x: { grid: { display: false } } },
+      plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + fmt(Math.round(c.raw)) + '원' } } }
+    }
+  });
+}
+
+function renderRevenue(scenario) {
+  revScenario = scenario || revScenario;
+  const sMap = {basic:'basic',admission:'adm',surgery:'sur'};
+  const sk = sMap[revScenario];
+  const rev = D[H].rev;
+  const rt = D[H].rt;
+  let rows = '';
+  for (let k=1; k<=5; k++) {
+    const r = rev[k][sk];
+    const diff = r.c - r.k;
+    rows += `<tr><td class="bold c" style="color:${D.kc[k]}">KTAS ${k}</td><td class="r">${fmt(r.c)}원</td><td class="r">${fmt(r.k)}원</td>
+      <td class="r ${diff>=0?'rv-pos':'rv-neg'}">${diff>=0?'+':''}${fmt(diff)}원</td></tr>`;
+  }
+  document.getElementById('revenueTable').innerHTML = `<table class="data-table"><thead><tr><th class="c">KTAS</th><th class="r">현재 수익</th><th class="r">KPI 기준선</th><th class="r">차액</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const t = rt[sk];
+  const diff = t.c - t.k;
+  const pct = (diff / t.k * 100).toFixed(1);
+  const cls = diff >= 0 ? 'rv-pos' : 'rv-neg';
+  const sign = diff >= 0 ? '+' : '';
+  document.getElementById('revenueSummary').innerHTML = `<div class="rv-summary">
+    <div class="lbl">KPI 대비 현재 수익</div><div class="amt ${cls}">${sign}${fmtW(diff)}원</div>
+    <div class="diff ${cls}">(${sign}${pct}%)</div></div>`;
+}
+
+function renderRevenueInfo() {
+  const rt = D[H].rt;
+  const scenarios = [
+    {key:'basic', label:'기본검사', icon:'&#9662;', desc:'기본lab 처방 기준'},
+    {key:'adm', label:'입원시 검사', icon:'&#9650;', desc:'입원 추가검사 표준화'},
+    {key:'sur', label:'수술시 검사', icon:'&#9650;', desc:'수술 추가검사 포함'}
+  ];
+  const maxK = Math.max(...scenarios.map(s => rt[s.key].k));
+  const html = scenarios.map(s => {
+    const t = rt[s.key];
+    const diff = t.c - t.k;
+    const pct = (diff / t.k * 100).toFixed(1);
+    const cls = diff >= 0 ? 'rv-pos' : 'rv-neg';
+    const sign = diff >= 0 ? '+' : '';
+    const barC = Math.min(t.c / maxK * 100, 100);
+    const barK = Math.min(t.k / maxK * 100, 100);
+    return `<div style="padding:14px;background:#F8F9FA;border-radius:8px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-weight:700;font-size:13px;color:#1B2A4A">${s.label}</div>
+        <div class="${cls}" style="font-size:13px">${sign}${fmtW(diff)}원 (${sign}${pct}%)</div>
+      </div>
+      <div style="font-size:11px;color:#7F8C8D;margin-bottom:6px">현재 수익: ${fmtW(t.c)}원</div>
+      <div style="height:8px;background:#EAECEE;border-radius:4px;margin-bottom:4px;position:relative">
+        <div style="height:100%;width:${barC}%;background:#2E6EB5;border-radius:4px"></div>
+      </div>
+      <div style="font-size:11px;color:#7F8C8D;margin-bottom:6px">KPI 기준선: ${fmtW(t.k)}원</div>
+      <div style="height:8px;background:#EAECEE;border-radius:4px;position:relative">
+        <div style="height:100%;width:${barK}%;background:rgba(27,42,74,0.25);border-radius:4px"></div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('revenueInfoPanel').innerHTML = html;
+}
+
+function renderAdditionalTests() {
+  const tests = D[H].addTests;
+  const maxCnt = tests[0]?.cnt || 1;
+  let rows = tests.map((t,i) => `<tr>
+    <td class="c">${i+1}</td><td style="font-size:11px;color:#7F8C8D">${t.cd}</td><td>${t.nm}</td>
+    <td class="r">${fmt(t.cnt)}</td><td class="r">${fmt(t.pt)}</td>
+    <td><div style="height:6px;background:#EAECEE;border-radius:3px;width:100%"><div style="height:100%;width:${t.cnt/maxCnt*100}%;background:#2E6EB5;border-radius:3px"></div></div></td>
+    <td class="c"><span class="cat cat-${t.cat}">${t.cat}</span></td></tr>`).join('');
+  document.getElementById('testAdditionalTab').innerHTML = `<table class="data-table"><thead><tr><th class="c">#</th><th>수가코드</th><th>수가명</th><th class="r">처방건수</th><th class="r">환자수</th><th style="min-width:120px">빈도</th><th class="c">카테고리</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderLowFreqTests() {
+  const tests = D[H].lowTests;
+  let rows = tests.map(t => `<tr><td style="font-size:11px;color:#7F8C8D">${t.cd}</td><td>${t.nm}</td><td class="r">${t.cnt}건</td><td class="r">${fmt(t.up)}원</td><td class="r">${fmt(t.t)}원</td></tr>`).join('');
+  document.getElementById('testLowfreqTab').innerHTML = `<table class="data-table"><thead><tr><th>수가코드</th><th>수가명</th><th class="r">처방건수</th><th class="r">단가</th><th class="r">총금액</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderTestSets() {
+  const ss = D.sets;
+  const isYuseong = H === 'yuseong';
+  const boldGroups = isYuseong
+    ? [{title:'유성 수술시 추가',items:D.boldSurgery},{title:'유성 고령+수술시 추가',items:D.boldElderly}]
+    : [{title:'목동 기본lab 추가',items:D.boldMokdong},{title:'목동 입원시 추가',items:D.boldMokdongAdm},{title:'목동 고령+수술시 추가',items:D.boldMokdongElderly}];
+  const renderGroup = (g) => {
+    const total = g.items.reduce((s,i)=>s+i.price,0);
+    return `<div style="margin-bottom:16px"><div style="font-weight:700;font-size:13px;color:#1B2A4A;margin-bottom:8px;padding:8px 12px;background:#F0F4FF;border-radius:6px;display:flex;justify-content:space-between"><span>${g.title}</span><span style="color:#2E6EB5">${g.items.length}개 항목 · 합계 ${fmt(total)}원</span></div>
+    <table class="data-table"><thead><tr><th>수가코드</th><th>수가명</th><th class="r">단가</th></tr></thead><tbody>${g.items.map(i=>`<tr><td style="font-size:11px;color:#7F8C8D">${i.cd}</td><td><strong>${i.nm}</strong></td><td class="r">${fmt(i.price)}원</td></tr>`).join('')}</tbody></table></div>`;
+  };
+  document.getElementById('testSetsTab').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+      ${Object.values(ss).map(s => `<div style="padding:20px;background:#F8F9FA;border-radius:8px;text-align:center">
+        <div style="font-size:12px;color:#7F8C8D;margin-bottom:8px">${s.l}</div>
+        <div style="font-size:22px;font-weight:800;color:#1B2A4A">${fmt(s.c)}<span style="font-size:12px">원</span></div>
+        <div style="font-size:12px;color:#7F8C8D;margin-top:4px">${s.n}개 항목</div>
+      </div>`).join('')}
+    </div>
+    <div style="margin-top:20px">
+      <div style="font-size:14px;font-weight:700;color:#1B2A4A;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E0E0E0">📋 단계별 추가처방 검사 항목 (굵은글씨 지정)</div>
+      ${boldGroups.map(g => renderGroup(g)).join('')}
+    </div>
+    <div style="margin-top:16px;padding:12px;background:#EBF5FB;border-radius:8px;font-size:12px;color:#2E6EB5">
+      <strong>유성-목동 기본lab 차이:</strong> 목동이 유성 대비 46,450원(29.3%) 높음. 주 원인: 갑상선기능검사(T3, Free T4, TSH) 포함 여부.
+      입원추가(고령+수술) 단계에서는 3.3%로 수렴.
+    </div>`;
+}
+
+function renderROOMi() {
+  const rm = D[H].roomi;
+  document.getElementById('roomiHospital').textContent = D[H].name;
+  document.getElementById('roomiSummaryTab').innerHTML = `<div class="roomi-body">${rm.sum}</div>`;
+  document.getElementById('roomiRecsTab').innerHTML = `<div class="rec-list">${rm.recs.map(r => `
+    <div class="rec-item"><div class="rec-num">${r.p}</div><div class="rec-body">
+      <div class="rec-title">${r.t}</div><div class="rec-desc">${r.desc}</div>
+      <div class="rec-meta"><span class="rec-tag eff">${r.e}</span><span class="rec-tag dif">난이도: ${r.d}</span><span class="rec-tag rsk">리스크: ${r.r}</span></div>
+    </div></div>`).join('')}</div>`;
+  const phases = [rm.rm.p1, rm.rm.p2, rm.rm.p3];
+  document.getElementById('roomiRoadmapTab').innerHTML = `<div class="roadmap">${phases.map(p => `
+    <div class="rm-phase"><div class="rm-dot"></div><div class="rm-title">${p.t}</div>
+      <ul class="rm-items">${p.items.map(i => `<li>${i}</li>`).join('')}</ul></div>`).join('')}</div>`;
+}
+
+function renderRisks() {
+  const risks = D[H].roomi.risks;
+  document.getElementById('riskPanel').innerHTML = `<div class="risk-list">${risks.map(r => `
+    <div class="risk-item"><div class="risk-hdr"><div class="risk-name">${r.n}</div><div class="${riskLvClass(r.lv)}">${r.lv}</div></div>
+      <div class="risk-bar"><div class="risk-bar-fill" style="width:${r.pct}%;background:${riskBarColor(r.pct)}"></div></div>
+      <div class="risk-detail"><span>${r.cur}</span><span>예상 삭감: ${r.amt}</span></div></div>`).join('')}</div>`;
+  document.getElementById('benchmarkDoctor').textContent = D[H].roomi.bench;
+}
+
+/* =============== TAB SWITCHING =============== */
+function switchDoctorTab(tab, btn) {
+  document.querySelectorAll('#doctorRateTab,#doctorRevenueTab,#doctorKpiTab').forEach(el => el.classList.remove('active'));
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'rate') { document.getElementById('doctorRateTab').classList.add('active'); }
+  else if (tab === 'revenue') { document.getElementById('doctorRevenueTab').classList.add('active'); }
+  else { document.getElementById('doctorKpiTab').classList.add('active'); renderDoctorKpi(); }
+}
+
+function switchRevenueTab(scenario, btn) {
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRevenue(scenario);
+}
+
+function switchTestTab(tab, btn) {
+  document.querySelectorAll('#testAdditionalTab,#testLowfreqTab,#testSetsTab').forEach(el => el.classList.remove('active'));
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'additional') document.getElementById('testAdditionalTab').classList.add('active');
+  else if (tab === 'lowfreq') document.getElementById('testLowfreqTab').classList.add('active');
+  else document.getElementById('testSetsTab').classList.add('active');
+}
+
+function switchRoomiTab(tab, btn) {
+  document.querySelectorAll('#roomiSummaryTab,#roomiRecsTab,#roomiRoadmapTab').forEach(el => el.classList.remove('active'));
+  btn.parentElement.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (tab === 'summary') document.getElementById('roomiSummaryTab').classList.add('active');
+  else if (tab === 'recs') document.getElementById('roomiRecsTab').classList.add('active');
+  else document.getElementById('roomiRoadmapTab').classList.add('active');
+}
+
+/* =============== HOSPITAL SWITCH =============== */
+function switchHospital(key) {
+  H = key;
+  document.querySelectorAll('.hospital-switch button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.hospital-switch button').forEach(b => { if ((key==='daejeon'&&b.textContent.includes('대전'))||(key==='yuseong'&&b.textContent.includes('유성'))) b.classList.add('active'); });
+  document.getElementById('headerPeriod').textContent = D[H].period + ' (6개월)';
+  document.querySelector('.dashboard').classList.add('fade-in');
+  renderAll();
+  setTimeout(() => document.querySelector('.dashboard').classList.remove('fade-in'), 300);
+}
+
+function renderAll() {
+  renderKPI();
+  renderDoctorRate();
+  renderDoctorRevenue();
+  renderRevenue();
+  renderRevenueInfo();
+  renderAdditionalTests();
+  renderLowFreqTests();
+  renderTestSets();
+  renderROOMi();
+  renderRisks();
+}
+
+/* =============== INIT =============== */
+document.addEventListener('DOMContentLoaded', () => { renderAll(); });
+</script>
+</body>
+</html>
