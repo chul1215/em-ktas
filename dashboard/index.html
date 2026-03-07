@@ -6,144 +6,169 @@
 <title>EM-KTAS 응급실 검사처방 분석 대시보드</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
+:root{
+--glass-bg:rgba(255,255,255,0.07);
+--glass-bg-hover:rgba(255,255,255,0.11);
+--glass-border:rgba(255,255,255,0.14);
+--glass-blur:blur(20px) saturate(160%);
+--glass-shadow:0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18);
+--glass-shadow-hover:0 16px 48px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.22);
+--accent-blue:#5BA8FF;
+--accent-cyan:#38D9F5;
+--accent-purple:#A78BFA;
+--accent-green:#34D399;
+--accent-amber:#FBBF24;
+--text-primary:rgba(255,255,255,0.92);
+--text-secondary:rgba(255,255,255,0.55);
+--text-muted:rgba(255,255,255,0.35);
+--border-subtle:rgba(255,255,255,0.08);
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:14px;scroll-behavior:smooth}
-body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F0F2F5;color:#2C3E50;line-height:1.5}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#060B18;color:var(--text-primary);line-height:1.5;min-height:100vh;position:relative;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-20%;left:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(91,168,255,0.18) 0%,transparent 70%);border-radius:50%;z-index:0;animation:blobFloat 12s ease-in-out infinite;pointer-events:none}
+body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(56,217,245,0.12) 0%,transparent 70%);border-radius:50%;z-index:0;animation:blobFloat 15s ease-in-out infinite reverse;pointer-events:none}
+@keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(40px,-30px) scale(1.05)}50%{transform:translate(-20px,40px) scale(0.95)}75%{transform:translate(30px,20px) scale(1.03)}}
 /* HEADER */
-.header{background:#1B2A4A;color:#fff;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.header{background:rgba(6,11,24,0.7);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);color:#fff;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,0.3);border-bottom:1px solid var(--glass-border)}
 .header-logo{font-size:18px;font-weight:700;display:flex;align-items:center;gap:10px}
-.logo-icon{width:32px;height:32px;background:#2E6EB5;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
-.hospital-switch{display:flex;background:rgba(255,255,255,.1);border-radius:8px;overflow:hidden}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.hospital-switch{display:flex;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden;border:1px solid var(--border-subtle)}
 .hospital-switch button{padding:8px 28px;border:none;background:transparent;color:rgba(255,255,255,.5);font-size:14px;font-weight:600;cursor:pointer;transition:all .3s}
-.hospital-switch button.active{background:#2E6EB5;color:#fff}
+.hospital-switch button.active{background:linear-gradient(135deg,rgba(91,168,255,0.5),rgba(56,217,245,0.3));color:#fff}
 .hospital-switch button:hover:not(.active){color:rgba(255,255,255,.85)}
-.header-period{font-size:13px;color:rgba(255,255,255,.6)}
+.header-period{font-size:13px;color:rgba(255,255,255,.5)}
 /* LAYOUT */
-.dashboard{max-width:1440px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:24px}
+.dashboard{max-width:1440px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:24px;position:relative;z-index:1}
 .row{display:grid;gap:24px}
 .row-2{grid-template-columns:1fr 1fr}
 .row-7-5{grid-template-columns:7fr 5fr}
 .row-full{grid-template-columns:1fr}
 /* CARD */
-.card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:24px;transition:box-shadow .2s}
-.card:hover{box-shadow:0 4px 12px rgba(0,0,0,.1)}
-.card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#1B2A4A;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #1B2A4A;display:flex;align-items:center;justify-content:space-between}
+.card{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);border-radius:20px;box-shadow:var(--glass-shadow);padding:24px;transition:transform .3s,box-shadow .3s,background .3s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);pointer-events:none}
+.card:hover{transform:translateY(-3px);box-shadow:var(--glass-shadow-hover);background:var(--glass-bg-hover)}
+.card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--accent-cyan);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between}
 /* KPI CARDS */
 .kpi-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
-.kpi-card{background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:20px;border-left:4px solid;transition:transform .2s,box-shadow .2s}
-.kpi-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
-.kpi-card:nth-child(1){border-left-color:#2E6EB5}
-.kpi-card:nth-child(2){border-left-color:#27AE60}
-.kpi-card:nth-child(3){border-left-color:#F39C12}
-.kpi-card:nth-child(4){border-left-color:#8E44AD}
-.kpi-card:nth-child(5){border-left-color:#E74C3C}
-.kpi-label{font-size:12px;color:#7F8C8D;font-weight:600;margin-bottom:8px}
-.kpi-value{font-size:26px;font-weight:800;color:#1B2A4A;line-height:1.2}
-.kpi-sub{font-size:12px;color:#7F8C8D;margin-top:4px}
+.kpi-card{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);border-radius:20px;box-shadow:var(--glass-shadow);padding:20px;border-left:none;transition:transform .3s,box-shadow .3s,background .3s;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:20px 20px 0 0;pointer-events:none}
+.kpi-card:nth-child(1)::before{background:linear-gradient(90deg,#5BA8FF,#38D9F5)}
+.kpi-card:nth-child(2)::before{background:linear-gradient(90deg,#34D399,#5BA8FF)}
+.kpi-card:nth-child(3)::before{background:linear-gradient(90deg,#A78BFA,#5BA8FF)}
+.kpi-card:nth-child(4)::before{background:linear-gradient(90deg,#FBBF24,#F97316)}
+.kpi-card:nth-child(5)::before{background:linear-gradient(90deg,#F472B6,#A78BFA)}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:var(--glass-shadow-hover);background:var(--glass-bg-hover)}
+.kpi-label{font-size:12px;color:var(--text-secondary);font-weight:600;margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:800;color:var(--text-primary);line-height:1.2}
+.kpi-sub{font-size:12px;color:var(--text-secondary);margin-top:4px}
 /* TABS */
-.tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid #E0E0E0}
-.tab-btn{padding:8px 16px;border:none;background:transparent;color:#7F8C8D;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
-.tab-btn.active{color:#1B2A4A;border-bottom-color:#2E6EB5}
-.tab-btn:hover:not(.active){color:#2C3E50}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:none;background:rgba(255,255,255,0.05);border:1px solid var(--border-subtle);border-radius:10px;padding:4px}
+.tab-btn{padding:8px 16px;border:none;background:transparent;color:var(--text-secondary);font-size:13px;font-weight:600;cursor:pointer;border-bottom:none;border-radius:7px;transition:all .2s}
+.tab-btn.active{color:#fff;background:linear-gradient(135deg,rgba(46,110,181,0.6),rgba(91,168,255,0.4));box-shadow:inset 0 1px 0 rgba(255,255,255,0.15)}
+.tab-btn:hover:not(.active){color:var(--text-primary);background:rgba(255,255,255,0.05)}
 .tab-content{display:none}
 .tab-content.active{display:block}
 /* TABLE */
 .data-table{width:100%;border-collapse:collapse;font-size:13px}
-.data-table thead th{background:#F8F9FA;padding:10px 12px;text-align:left;font-weight:700;color:#1B2A4A;border-bottom:2px solid #E0E0E0;white-space:nowrap}
+.data-table thead th{background:rgba(255,255,255,0.05);padding:10px 12px;text-align:left;font-weight:700;color:var(--accent-cyan);border-bottom:1px solid var(--border-subtle);white-space:nowrap}
 .data-table th.c,.data-table td.c{text-align:center}
 .data-table th.r,.data-table td.r{text-align:right}
-.data-table tbody td{padding:10px 12px;border-bottom:1px solid #F0F0F0}
-.data-table tbody tr:hover{background:#F8FAFE}
-.data-table tbody tr.total-row{font-weight:700;background:#F8F9FA;border-top:2px solid #E0E0E0}
+.data-table tbody td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-primary)}
+.data-table tbody tr:hover{background:rgba(255,255,255,0.05)}
+.data-table tbody tr.total-row{font-weight:700;background:rgba(255,255,255,0.05);border-top:1px solid var(--border-subtle)}
 /* HEATMAP */
 .hm{padding:4px 8px;border-radius:4px;text-align:center;font-weight:600;font-size:12px;display:inline-block;min-width:54px}
-.hm-g{background:#D5F5E3;color:#1E8449}
-.hm-r{background:#FADBD8;color:#C0392B}
-.hm-o{background:#FDEBD0;color:#D35400}
-.hm-x{background:#EAECEE;color:#7F8C8D}
+.hm-g{background:rgba(52,211,153,0.2);color:#34D399}
+.hm-r{background:rgba(91,168,255,0.15);color:#5BA8FF}
+.hm-o{background:rgba(251,191,36,0.18);color:#FBBF24}
+.hm-x{background:rgba(255,255,255,0.06);color:var(--text-muted)}
 /* GAUGE */
-.gauge{height:8px;background:#EAECEE;border-radius:4px;position:relative;margin-top:6px}
+.gauge{height:8px;background:rgba(255,255,255,0.1);border-radius:4px;position:relative;margin-top:6px}
 .gauge-fill{height:100%;border-radius:4px;transition:width .6s}
-.gauge-target{position:absolute;top:-4px;width:2px;height:16px;background:#1B2A4A;border-radius:1px}
+.gauge-target{position:absolute;top:-4px;width:2px;height:16px;background:var(--accent-cyan);border-radius:1px}
 /* STATUS */
 .st{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
-.st-ok{background:#D5F5E3;color:#1E8449}
-.st-warn{background:#FDEBD0;color:#D35400}
-.st-bad{background:#FADBD8;color:#C0392B}
+.st-ok{background:rgba(52,211,153,0.2);color:#34D399}
+.st-warn{background:rgba(251,191,36,0.2);color:#FBBF24}
+.st-bad{background:rgba(91,168,255,0.15);color:#5BA8FF}
 /* REVENUE */
-.rv-pos{color:#27AE60;font-weight:700}
-.rv-neg{color:#E74C3C;font-weight:700}
-.rv-summary{display:flex;align-items:center;gap:16px;padding:16px;background:#F8F9FA;border-radius:8px;margin-top:16px}
-.rv-summary .lbl{font-weight:700;min-width:80px;font-size:12px;color:#7F8C8D}
-.rv-summary .amt{font-size:22px;font-weight:800;color:#1B2A4A}
+.rv-pos{color:#34D399;font-weight:700}
+.rv-neg{color:#F87171;font-weight:700}
+.rv-summary{display:flex;align-items:center;gap:16px;padding:16px;background:rgba(255,255,255,0.05);border-radius:8px;margin-top:16px;border:1px solid var(--border-subtle)}
+.rv-summary .lbl{font-weight:700;min-width:80px;font-size:12px;color:var(--text-secondary)}
+.rv-summary .amt{font-size:22px;font-weight:800}
 .rv-summary .diff{font-size:14px;font-weight:700;margin-left:12px}
 /* CHART */
 .chart-container{position:relative;width:100%}
 .chart-container canvas{width:100%!important}
 .donut-wrap{position:relative;display:flex;align-items:center;justify-content:center}
 .donut-center{position:absolute;text-align:center;pointer-events:none}
-.donut-center .amt{font-size:18px;font-weight:800;color:#1B2A4A}
-.donut-center .lbl{font-size:11px;color:#7F8C8D}
+.donut-center .amt{font-size:18px;font-weight:800;color:var(--text-primary)}
+.donut-center .lbl{font-size:11px;color:var(--text-secondary)}
 /* ROOMI */
-.roomi-card{border-left:4px solid #2E6EB5}
+.roomi-card{border-left:none;border-top:2px solid var(--accent-blue)}
 .roomi-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.roomi-avatar{width:48px;height:48px;background:linear-gradient(135deg,#1B2A4A,#2E6EB5);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0}
-.roomi-hdr-text h3{font-size:16px;color:#1B2A4A}
-.roomi-hdr-text p{font-size:12px;color:#7F8C8D}
-.roomi-body{font-size:13px;line-height:1.8}
+.roomi-avatar{width:48px;height:48px;border-radius:12px;flex-shrink:0;overflow:hidden;box-shadow:0 4px 16px rgba(91,168,255,0.3);border:2px solid var(--glass-border)}
+.roomi-avatar img{width:100%;height:100%;object-fit:cover}
+.roomi-hdr-text h3{font-size:16px;color:var(--text-primary)}
+.roomi-hdr-text p{font-size:12px;color:var(--text-secondary)}
+.roomi-body{font-size:13px;line-height:1.8;color:var(--text-primary)}
 .roomi-body p{margin-bottom:10px}
-.roomi-body strong{color:#1B2A4A}
-.roomi-body em{color:#2E6EB5;font-style:normal;font-weight:600}
+.roomi-body strong{color:var(--accent-blue)}
+.roomi-body em{color:var(--accent-cyan);font-style:normal;font-weight:600}
 /* RECS */
 .rec-list{display:flex;flex-direction:column;gap:10px}
-.rec-item{display:flex;gap:12px;padding:12px;background:#F8F9FA;border-radius:8px;align-items:flex-start}
-.rec-num{width:26px;height:26px;background:#2E6EB5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.rec-item{display:flex;gap:12px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;align-items:flex-start;border:1px solid var(--border-subtle)}
+.rec-num{width:26px;height:26px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
 .rec-body{flex:1}
-.rec-title{font-weight:700;font-size:13px;margin-bottom:2px}
-.rec-desc{font-size:12px;color:#7F8C8D}
+.rec-title{font-weight:700;font-size:13px;margin-bottom:2px;color:var(--text-primary)}
+.rec-desc{font-size:12px;color:var(--text-secondary)}
 .rec-meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
 .rec-tag{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600}
-.rec-tag.eff{background:#D5F5E3;color:#1E8449}
-.rec-tag.dif{background:#EBF5FB;color:#2E6EB5}
-.rec-tag.rsk{background:#FDEBD0;color:#D35400}
+.rec-tag.eff{background:rgba(52,211,153,0.18);color:#34D399}
+.rec-tag.dif{background:rgba(91,168,255,0.15);color:#5BA8FF}
+.rec-tag.rsk{background:rgba(251,191,36,0.18);color:#FBBF24}
 /* ROADMAP */
 .roadmap{display:flex;flex-direction:column;gap:20px}
 .rm-phase{position:relative;padding-left:24px}
-.rm-phase::before{content:'';position:absolute;left:7px;top:28px;bottom:-20px;width:2px;background:#E0E0E0}
+.rm-phase::before{content:'';position:absolute;left:7px;top:28px;bottom:-20px;width:2px;background:rgba(255,255,255,0.08)}
 .rm-phase:last-child::before{display:none}
 .rm-dot{width:16px;height:16px;border-radius:50%;position:absolute;left:0;top:3px}
-.rm-phase:nth-child(1) .rm-dot{background:#E74C3C}
-.rm-phase:nth-child(2) .rm-dot{background:#F39C12}
-.rm-phase:nth-child(3) .rm-dot{background:#2E6EB5}
-.rm-title{font-weight:700;font-size:13px;margin-bottom:8px;color:#1B2A4A}
+.rm-phase:nth-child(1) .rm-dot{background:var(--accent-blue);box-shadow:0 0 10px rgba(91,168,255,0.4)}
+.rm-phase:nth-child(2) .rm-dot{background:var(--accent-cyan);box-shadow:0 0 10px rgba(56,217,245,0.4)}
+.rm-phase:nth-child(3) .rm-dot{background:var(--accent-purple);box-shadow:0 0 10px rgba(167,139,250,0.4)}
+.rm-title{font-weight:700;font-size:13px;margin-bottom:8px;color:var(--text-primary)}
 .rm-items{list-style:none;display:flex;flex-direction:column;gap:4px}
-.rm-items li{font-size:12px;color:#5D6D7E;padding-left:16px;position:relative}
-.rm-items li::before{content:'—';position:absolute;left:0;color:#BDC3C7}
+.rm-items li{font-size:12px;color:var(--text-secondary);padding-left:16px;position:relative}
+.rm-items li::before{content:'—';position:absolute;left:0;color:var(--text-muted)}
 /* RISK */
 .risk-list{display:flex;flex-direction:column;gap:12px}
-.risk-item{padding:12px;border-radius:8px;background:#F8F9FA}
+.risk-item{padding:12px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid var(--border-subtle)}
 .risk-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.risk-name{font-weight:700;font-size:13px}
+.risk-name{font-weight:700;font-size:13px;color:var(--text-primary)}
 .risk-lv{font-size:11px;padding:2px 10px;border-radius:12px;font-weight:700}
-.risk-lv.high,.risk-lv.very-high{background:#FADBD8;color:#C0392B}
-.risk-lv.medium{background:#FDEBD0;color:#D35400}
-.risk-lv.low{background:#D5F5E3;color:#1E8449}
-.risk-bar{height:6px;background:#EAECEE;border-radius:3px;overflow:hidden}
+.risk-lv.high,.risk-lv.very-high{background:rgba(248,113,113,0.2);color:#F87171}
+.risk-lv.medium{background:rgba(91,168,255,0.2);color:#5BA8FF}
+.risk-lv.low{background:rgba(52,211,153,0.2);color:#34D399}
+.risk-bar{height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden}
 .risk-bar-fill{height:100%;border-radius:3px;transition:width .6s}
-.risk-detail{display:flex;justify-content:space-between;font-size:11px;color:#7F8C8D;margin-top:4px}
+.risk-detail{display:flex;justify-content:space-between;font-size:11px;color:var(--text-secondary);margin-top:4px}
 /* CATEGORY */
-.cat{font-size:10px;padding:1px 6px;border-radius:3px;font-weight:600;background:#EBF5FB;color:#2E6EB5}
-.cat-심장{background:#FADBD8;color:#C0392B}
-.cat-감염{background:#FDEBD0;color:#D35400}
-.cat-신경{background:#E8DAEF;color:#8E44AD}
-.cat-응고{background:#D5F5E3;color:#1E8449}
-.cat-모니터링{background:#F2F3F4;color:#566573}
+.cat{font-size:10px;padding:1px 6px;border-radius:3px;font-weight:600;background:rgba(91,168,255,0.15);color:#5BA8FF}
+.cat-심장{background:rgba(248,113,113,0.18);color:#F87171}
+.cat-감염{background:rgba(52,211,153,0.18);color:#34D399}
+.cat-신경{background:rgba(167,139,250,0.18);color:#A78BFA}
+.cat-응고{background:rgba(251,191,36,0.18);color:#FBBF24}
+.cat-모니터링{background:rgba(255,255,255,0.1);color:var(--text-secondary)}
+.cat-생화학{background:rgba(56,217,245,0.18);color:#38D9F5}
 /* ANIM */
 .fade-in{animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 ::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:#F0F2F5}
-::-webkit-scrollbar-thumb{background:#BDC3C7;border-radius:3px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,0.03)}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.25)}
 </style>
 </head>
 <body>
@@ -220,7 +245,7 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-s
   <div class="row row-7-5">
     <div class="card roomi-card">
       <div class="roomi-hdr">
-        <div class="roomi-avatar">Ri</div>
+        <div class="roomi-avatar"><img src="../design/ROOMi.jpg" alt="ROOMi"></div>
         <div class="roomi-hdr-text">
           <h3>ROOMi 분석 견해</h3>
           <p>적정진료관리팀 AI — <span id="roomiHospital"></span></p>
@@ -238,9 +263,9 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-s
     <div class="card">
       <div class="card-title">HIRA 삭감 리스크 분석</div>
       <div id="riskPanel"></div>
-      <div style="margin-top:16px;padding:12px;background:#F0F2F5;border-radius:8px">
-        <div style="font-size:12px;color:#7F8C8D;margin-bottom:4px">적정처방 벤치마크 의사</div>
-        <div style="font-size:14px;font-weight:700;color:#1B2A4A" id="benchmarkDoctor"></div>
+      <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px">
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:4px">적정처방 벤치마크 의사</div>
+        <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.9)" id="benchmarkDoctor"></div>
       </div>
     </div>
   </div>
@@ -252,7 +277,7 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-s
 const D = {
   kpi: {1:100, 2:100, 3:93, 4:75, 5:20},
   kl: {1:'소생', 2:'긴급', 3:'응급', 4:'준응급', 5:'비응급'},
-  kc: {1:'#E74C3C', 2:'#F39C12', 3:'#2E6EB5', 4:'#5BA0D9', 5:'#95A5A6'},
+  kc: {1:'#5BA8FF', 2:'#38D9F5', 3:'#A78BFA', 4:'#FBBF24', 5:'#F472B6'},
   sets: {basic:{l:'응급실 기본 lab',c:158570,n:48},surgery:{l:'기본lab+입원추가(수술)',c:347550,n:56},elderly:{l:'기본lab+입원추가(고령+수술)',c:421440,n:59},mokdong:{l:'목동 기본 lab',c:205020,n:52}},
   boldSurgery:[
     {cd:'L7624',nm:'Free T4(나-334)',price:11500},
@@ -480,9 +505,9 @@ function riskLvClass(lv) {
   return 'risk-lv low';
 }
 function riskBarColor(pct) {
-  if (pct >= 70) return '#E74C3C';
-  if (pct >= 40) return '#F39C12';
-  return '#27AE60';
+  if (pct >= 70) return '#F87171';
+  if (pct >= 40) return '#FBBF24';
+  return '#34D399';
 }
 
 /* =============== RENDER FUNCTIONS =============== */
@@ -500,7 +525,7 @@ function renderKPI() {
 function renderDoctorRate() {
   const docs = D[H].docs;
   let hdr = '<th>의사명</th><th class="c">환자수</th>';
-  for (let k=1; k<=5; k++) hdr += `<th class="c">KTAS ${k}<br><span style="font-size:10px;color:#7F8C8D">KPI ${D.kpi[k]}%</span></th>`;
+  for (let k=1; k<=5; k++) hdr += `<th class="c">KTAS ${k}<br><span style="font-size:10px;color:rgba(255,255,255,0.5)">KPI ${D.kpi[k]}%</span></th>`;
   hdr += '<th class="c">전체</th>';
   let rows = docs.map(d => {
     let r = `<tr><td class="bold">${d.n}</td><td class="c">${fmt(d.p)}</td>`;
@@ -521,10 +546,10 @@ function renderDoctorRevenue() {
     const pct = (d.avg/avgAll*100).toFixed(0);
     const barW = Math.min((d.avg/docs.reduce((m,x)=>Math.max(m,x.avg),0))*100, 100);
     return `<tr><td class="bold">${d.n}</td><td class="r">${fmt(d.p)}</td><td class="r">${fmt(d.avg)}원</td><td class="r">${fmt(d.med)}원</td>
-      <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:#EAECEE;border-radius:3px"><div style="height:100%;width:${barW}%;background:${d.avg>=avgAll?'#2E6EB5':'#E74C3C'};border-radius:3px"></div></div><span style="font-size:11px;font-weight:600">${pct}%</span></div></td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px"><div style="height:100%;width:${barW}%;background:${d.avg>=avgAll?'#5BA8FF':'rgba(255,255,255,0.25)'};border-radius:3px"></div></div><span style="font-size:11px;font-weight:600">${pct}%</span></div></td>
       <td class="c">${d.o}건</td><td class="r">${d.bla.toFixed(1)}건</td></tr>`;
   }).join('');
-  document.getElementById('doctorRevenueTab').innerHTML = `<div style="font-size:12px;color:#7F8C8D;margin-bottom:8px">전체 평균: ${fmt(Math.round(avgAll))}원</div>
+  document.getElementById('doctorRevenueTab').innerHTML = `<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:8px">전체 평균: ${fmt(Math.round(avgAll))}원</div>
     <table class="data-table"><thead><tr><th>의사명</th><th class="r">환자수</th><th class="r">평균금액</th><th class="r">중앙값</th><th style="min-width:160px">평균 대비</th><th class="c">평균 처방수</th><th class="r">기본lab 평균</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
@@ -537,14 +562,14 @@ function renderDoctorKpi() {
     data: {
       labels: docs.map(d => d.n),
       datasets: [
-        { label: '현재 환자당 평균금액', data: docs.map(d => d.avg), backgroundColor: '#2E6EB5', borderRadius: 4 },
-        { label: '병원 평균', data: docs.map(() => D[H].s.avgRev), type: 'line', borderColor: '#E74C3C', borderDash: [5,5], pointRadius: 0, borderWidth: 2, fill: false }
+        { label: '현재 환자당 평균금액', data: docs.map(d => d.avg), backgroundColor: '#5BA8FF', borderRadius: 4 },
+        { label: '병원 평균', data: docs.map(() => D[H].s.avgRev), type: 'line', borderColor: '#38D9F5', borderDash: [5,5], pointRadius: 0, borderWidth: 2, fill: false }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { y: { beginAtZero: false, ticks: { callback: v => (v/10000).toFixed(0)+'만' } }, x: { grid: { display: false } } },
-      plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + fmt(Math.round(c.raw)) + '원' } } }
+      scales: { y: { beginAtZero: false, ticks: { color:'rgba(255,255,255,0.5)', callback: v => (v/10000).toFixed(0)+'만' }, grid:{color:'rgba(255,255,255,0.06)'} }, x: { grid: { display: false }, ticks:{color:'rgba(255,255,255,0.5)'} } },
+      plugins: { legend: { position: 'bottom', labels:{color:'rgba(255,255,255,0.65)'} }, tooltip: { backgroundColor:'rgba(10,15,35,0.9)', titleColor:'#fff', bodyColor:'rgba(255,255,255,0.75)', borderColor:'rgba(255,255,255,0.15)', borderWidth:1, callbacks: { label: c => c.dataset.label + ': ' + fmt(Math.round(c.raw)) + '원' } } }
     }
   });
 }
@@ -589,18 +614,18 @@ function renderRevenueInfo() {
     const sign = diff >= 0 ? '+' : '';
     const barC = Math.min(t.c / maxK * 100, 100);
     const barK = Math.min(t.k / maxK * 100, 100);
-    return `<div style="padding:14px;background:#F8F9FA;border-radius:8px;margin-bottom:12px">
+    return `<div style="padding:14px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-weight:700;font-size:13px;color:#1B2A4A">${s.label}</div>
+        <div style="font-weight:700;font-size:13px;color:rgba(255,255,255,0.9)">${s.label}</div>
         <div class="${cls}" style="font-size:13px">${sign}${fmtW(diff)}원 (${sign}${pct}%)</div>
       </div>
-      <div style="font-size:11px;color:#7F8C8D;margin-bottom:6px">현재 수익: ${fmtW(t.c)}원</div>
-      <div style="height:8px;background:#EAECEE;border-radius:4px;margin-bottom:4px;position:relative">
-        <div style="height:100%;width:${barC}%;background:#2E6EB5;border-radius:4px"></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px">현재 수익: ${fmtW(t.c)}원</div>
+      <div style="height:8px;background:rgba(255,255,255,0.1);border-radius:4px;margin-bottom:4px;position:relative">
+        <div style="height:100%;width:${barC}%;background:linear-gradient(90deg,#2E6EB5,#5BA8FF);border-radius:4px"></div>
       </div>
-      <div style="font-size:11px;color:#7F8C8D;margin-bottom:6px">KPI 기준선: ${fmtW(t.k)}원</div>
-      <div style="height:8px;background:#EAECEE;border-radius:4px;position:relative">
-        <div style="height:100%;width:${barK}%;background:rgba(27,42,74,0.25);border-radius:4px"></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:6px">KPI 기준선: ${fmtW(t.k)}원</div>
+      <div style="height:8px;background:rgba(255,255,255,0.1);border-radius:4px;position:relative">
+        <div style="height:100%;width:${barK}%;background:rgba(255,255,255,0.15);border-radius:4px"></div>
       </div>
     </div>`;
   }).join('');
@@ -611,16 +636,16 @@ function renderAdditionalTests() {
   const tests = D[H].addTests;
   const maxCnt = tests[0]?.cnt || 1;
   let rows = tests.map((t,i) => `<tr>
-    <td class="c">${i+1}</td><td style="font-size:11px;color:#7F8C8D">${t.cd}</td><td>${t.nm}</td>
+    <td class="c">${i+1}</td><td style="font-size:11px;color:rgba(255,255,255,0.5)">${t.cd}</td><td>${t.nm}</td>
     <td class="r">${fmt(t.cnt)}</td><td class="r">${fmt(t.pt)}</td>
-    <td><div style="height:6px;background:#EAECEE;border-radius:3px;width:100%"><div style="height:100%;width:${t.cnt/maxCnt*100}%;background:#2E6EB5;border-radius:3px"></div></div></td>
+    <td><div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;width:100%"><div style="height:100%;width:${t.cnt/maxCnt*100}%;background:linear-gradient(90deg,#2E6EB5,#5BA8FF);border-radius:3px"></div></div></td>
     <td class="c"><span class="cat cat-${t.cat}">${t.cat}</span></td></tr>`).join('');
   document.getElementById('testAdditionalTab').innerHTML = `<table class="data-table"><thead><tr><th class="c">#</th><th>수가코드</th><th>수가명</th><th class="r">처방건수</th><th class="r">환자수</th><th style="min-width:120px">빈도</th><th class="c">카테고리</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function renderLowFreqTests() {
   const tests = D[H].lowTests;
-  let rows = tests.map(t => `<tr><td style="font-size:11px;color:#7F8C8D">${t.cd}</td><td>${t.nm}</td><td class="r">${t.cnt}건</td><td class="r">${fmt(t.up)}원</td><td class="r">${fmt(t.t)}원</td></tr>`).join('');
+  let rows = tests.map(t => `<tr><td style="font-size:11px;color:rgba(255,255,255,0.5)">${t.cd}</td><td>${t.nm}</td><td class="r">${t.cnt}건</td><td class="r">${fmt(t.up)}원</td><td class="r">${fmt(t.t)}원</td></tr>`).join('');
   document.getElementById('testLowfreqTab').innerHTML = `<table class="data-table"><thead><tr><th>수가코드</th><th>수가명</th><th class="r">처방건수</th><th class="r">단가</th><th class="r">총금액</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
@@ -632,22 +657,22 @@ function renderTestSets() {
     : [{title:'목동 기본lab 추가',items:D.boldMokdong},{title:'목동 입원시 추가',items:D.boldMokdongAdm},{title:'목동 고령+수술시 추가',items:D.boldMokdongElderly}];
   const renderGroup = (g) => {
     const total = g.items.reduce((s,i)=>s+i.price,0);
-    return `<div style="margin-bottom:16px"><div style="font-weight:700;font-size:13px;color:#1B2A4A;margin-bottom:8px;padding:8px 12px;background:#F0F4FF;border-radius:6px;display:flex;justify-content:space-between"><span>${g.title}</span><span style="color:#2E6EB5">${g.items.length}개 항목 · 합계 ${fmt(total)}원</span></div>
-    <table class="data-table"><thead><tr><th>수가코드</th><th>수가명</th><th class="r">단가</th></tr></thead><tbody>${g.items.map(i=>`<tr><td style="font-size:11px;color:#7F8C8D">${i.cd}</td><td><strong>${i.nm}</strong></td><td class="r">${fmt(i.price)}원</td></tr>`).join('')}</tbody></table></div>`;
+    return `<div style="margin-bottom:16px"><div style="font-weight:700;font-size:13px;color:rgba(255,255,255,0.9);margin-bottom:8px;padding:8px 12px;background:rgba(91,168,255,0.08);border-radius:6px;display:flex;justify-content:space-between"><span>${g.title}</span><span style="color:#5BA8FF">${g.items.length}개 항목 · 합계 ${fmt(total)}원</span></div>
+    <table class="data-table"><thead><tr><th>수가코드</th><th>수가명</th><th class="r">단가</th></tr></thead><tbody>${g.items.map(i=>`<tr><td style="font-size:11px;color:rgba(255,255,255,0.5)">${i.cd}</td><td><strong>${i.nm}</strong></td><td class="r">${fmt(i.price)}원</td></tr>`).join('')}</tbody></table></div>`;
   };
   document.getElementById('testSetsTab').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
-      ${Object.values(ss).map(s => `<div style="padding:20px;background:#F8F9FA;border-radius:8px;text-align:center">
-        <div style="font-size:12px;color:#7F8C8D;margin-bottom:8px">${s.l}</div>
-        <div style="font-size:22px;font-weight:800;color:#1B2A4A">${fmt(s.c)}<span style="font-size:12px">원</span></div>
-        <div style="font-size:12px;color:#7F8C8D;margin-top:4px">${s.n}개 항목</div>
+      ${Object.values(ss).map(s => `<div style="padding:20px;background:rgba(255,255,255,0.05);border-radius:8px;text-align:center">
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:8px">${s.l}</div>
+        <div style="font-size:22px;font-weight:800;color:rgba(255,255,255,0.9)">${fmt(s.c)}<span style="font-size:12px">원</span></div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px">${s.n}개 항목</div>
       </div>`).join('')}
     </div>
     <div style="margin-top:20px">
-      <div style="font-size:14px;font-weight:700;color:#1B2A4A;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E0E0E0">📋 단계별 추가처방 검사 항목 (굵은글씨 지정)</div>
+      <div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.08)">📋 단계별 추가처방 검사 항목 (굵은글씨 지정)</div>
       ${boldGroups.map(g => renderGroup(g)).join('')}
     </div>
-    <div style="margin-top:16px;padding:12px;background:#EBF5FB;border-radius:8px;font-size:12px;color:#2E6EB5">
+    <div style="margin-top:16px;padding:12px;background:rgba(91,168,255,0.1);border-radius:8px;font-size:12px;color:#5BA8FF;border:1px solid rgba(91,168,255,0.15)">
       <strong>유성-목동 기본lab 차이:</strong> 목동이 유성 대비 46,450원(29.3%) 높음. 주 원인: 갑상선기능검사(T3, Free T4, TSH) 포함 여부.
       입원추가(고령+수술) 단계에서는 3.3%로 수렴.
     </div>`;
@@ -655,8 +680,52 @@ function renderTestSets() {
 
 function renderROOMi() {
   const rm = D[H].roomi;
+  const s = D[H].s;
+  const kt = D[H].ktas;
+  const em = D[H].em;
+  // KTAS 3 수익 비중
+  const k3pct = (kt[3].tr / s.totalRevenue * 100).toFixed(1);
+  // KTAS별 처방율 vs KPI 미니 게이지
+  const miniGauge = (label, color, rate, kpi) => {
+    const over = rate > kpi * 1.2;
+    const barColor = rate >= kpi ? (over ? '#FBBF24' : '#34D399') : '#F87171';
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <div style="width:56px;font-size:11px;font-weight:700;color:${color}">KTAS ${label}</div>
+      <div style="flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;position:relative">
+        <div style="height:100%;width:${Math.min(rate,100)}%;background:${barColor};border-radius:3px"></div>
+        <div style="position:absolute;top:-3px;left:${kpi}%;width:2px;height:12px;background:rgba(255,255,255,0.6);border-radius:1px"></div>
+      </div>
+      <div style="width:42px;font-size:11px;font-weight:600;text-align:right">${rate.toFixed(1)}%</div>
+    </div>`;
+  };
+  const infographic = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+    <div style="padding:14px;background:rgba(91,168,255,0.08);border-radius:8px;text-align:center">
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px">총 내원건수</div>
+      <div style="font-size:20px;font-weight:800;color:rgba(255,255,255,0.9)">${fmt(s.totalVisits)}<span style="font-size:11px">건</span></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">월평균 ${fmt(Math.round(s.totalVisits/6))}건</div>
+    </div>
+    <div style="padding:14px;background:rgba(91,168,255,0.08);border-radius:8px;text-align:center">
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px">기본lab 처방율</div>
+      <div style="font-size:20px;font-weight:800;color:#5BA8FF">${s.labRate}%</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">EM 의사 ${s.docs}명</div>
+    </div>
+    <div style="padding:14px;background:rgba(91,168,255,0.08);border-radius:8px;text-align:center">
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px">내원건당 평균금액</div>
+      <div style="font-size:20px;font-weight:800;color:rgba(255,255,255,0.9)">${fmt(s.avgRev)}<span style="font-size:11px">원</span></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">총 ${fmtW(s.totalRevenue)}원</div>
+    </div>
+    <div style="padding:14px;background:rgba(91,168,255,0.08);border-radius:8px;text-align:center">
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:4px">입원율</div>
+      <div style="font-size:20px;font-weight:800;color:#A78BFA">${s.admRate}%</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px">KTAS 3 수익비중 ${k3pct}%</div>
+    </div>
+  </div>
+  <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:16px">
+    <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:8px">KTAS 등급별 처방율 vs KPI <span style="font-size:10px;color:rgba(255,255,255,0.5);font-weight:400">(| = KPI 목표)</span></div>
+    ${[1,2,3,4,5].map(k => miniGauge(k, D.kc[k], em[k].lr, D.kpi[k])).join('')}
+  </div>`;
   document.getElementById('roomiHospital').textContent = D[H].name;
-  document.getElementById('roomiSummaryTab').innerHTML = `<div class="roomi-body">${rm.sum}</div>`;
+  document.getElementById('roomiSummaryTab').innerHTML = infographic + `<div class="roomi-body">${rm.sum}</div>`;
   document.getElementById('roomiRecsTab').innerHTML = `<div class="rec-list">${rm.recs.map(r => `
     <div class="rec-item"><div class="rec-num">${r.p}</div><div class="rec-body">
       <div class="rec-title">${r.t}</div><div class="rec-desc">${r.desc}</div>
