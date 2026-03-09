@@ -241,8 +241,9 @@ body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:500px;height:
   /* ROADMAP */
   .rm-title{font-size:12px}
   .rm-items li{font-size:11px}
-  /* BLOB smaller on mobile */
-  body::before{width:300px;height:300px}
+  /* BLOB smaller on mobile — body::before는 오버레이이므로 건드리지 않음 */
+  body{background-attachment:scroll}
+  body::before{background:rgba(6,11,24,0.82)}
   body::after{width:250px;height:250px}
 }
 @media (max-width:480px){
@@ -261,7 +262,7 @@ body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:500px;height:
   .roomi-avatar{width:36px;height:36px}
   .roomi-hdr-text h3{font-size:13px}
   .roomi-body{font-size:11px;line-height:1.65}
-  body::before{width:200px;height:200px;opacity:0.7}
+  body::before{background:rgba(6,11,24,0.86)}
   body::after{width:180px;height:180px;opacity:0.7}
 }
 </style>
