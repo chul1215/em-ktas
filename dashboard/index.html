@@ -321,7 +321,7 @@ body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:500px;height:
       <div id="doctorRateTab" class="tab-content active"></div>
       <div id="doctorRevenueTab" class="tab-content"></div>
       <div id="doctorKpiTab" class="tab-content">
-        <div class="chart-container" style="height:340px"><canvas id="doctorKpiChart"></canvas></div>
+        <div class="chart-container" style="height:440px"><canvas id="doctorKpiChart"></canvas></div>
       </div>
     </div>
   </div>
@@ -685,19 +685,78 @@ function renderDoctorKpi() {
   const docs = D[H].docs;
   const ctx = document.getElementById('doctorKpiChart');
   if (charts.docKpi) charts.docKpi.destroy();
+  const kpiTargets = [1,2,3,4,5].map(k => D[H].kpi[k]);
+  const docColors = [
+    {b:'#5BA8FF',bg:'rgba(91,168,255,0.07)'},
+    {b:'#38D9F5',bg:'rgba(56,217,245,0.07)'},
+    {b:'#A78BFA',bg:'rgba(167,139,250,0.07)'},
+    {b:'#FBBF24',bg:'rgba(251,191,36,0.07)'},
+    {b:'#F472B6',bg:'rgba(244,114,182,0.07)'},
+    {b:'#4ADE80',bg:'rgba(74,222,128,0.07)'},
+    {b:'#FB923C',bg:'rgba(251,146,60,0.07)'},
+    {b:'#E879F9',bg:'rgba(232,121,249,0.07)'},
+    {b:'#34D399',bg:'rgba(52,211,153,0.07)'},
+    {b:'#FDE047',bg:'rgba(253,224,71,0.07)'}
+  ];
+  const datasets = [
+    {
+      label: 'KPI 목표',
+      data: kpiTargets,
+      borderColor: 'rgba(255,255,255,0.45)',
+      backgroundColor: 'rgba(255,255,255,0.04)',
+      borderWidth: 2,
+      borderDash: [5,4],
+      pointRadius: 4,
+      pointBackgroundColor: 'rgba(255,255,255,0.5)',
+      pointBorderColor: 'transparent',
+      fill: true
+    },
+    ...docs.map((d, i) => {
+      const c = docColors[i % docColors.length];
+      return {
+        label: d.n,
+        data: [1,2,3,4,5].map(k => d.kr[k] ?? 0),
+        borderColor: c.b,
+        backgroundColor: c.bg,
+        borderWidth: 1.5,
+        pointRadius: 3,
+        pointBackgroundColor: c.b,
+        pointBorderColor: 'transparent',
+        fill: true
+      };
+    })
+  ];
   charts.docKpi = new Chart(ctx, {
-    type: 'bar',
+    type: 'radar',
     data: {
-      labels: docs.map(d => d.n),
-      datasets: [
-        { label: '현재 환자당 평균금액', data: docs.map(d => d.avg), backgroundColor: '#5BA8FF', borderRadius: 4 },
-        { label: '병원 평균', data: docs.map(() => D[H].s.avgRev), type: 'line', borderColor: '#38D9F5', borderDash: [5,5], pointRadius: 0, borderWidth: 2, fill: false }
-      ]
+      labels: ['KTAS 1', 'KTAS 2', 'KTAS 3', 'KTAS 4', 'KTAS 5'],
+      datasets
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { y: { beginAtZero: false, ticks: { color:'rgba(255,255,255,0.5)', callback: v => (v/10000).toFixed(0)+'만' }, grid:{color:'rgba(255,255,255,0.06)'} }, x: { grid: { display: false }, ticks:{color:'rgba(255,255,255,0.5)'} } },
-      plugins: { legend: { position: 'bottom', labels:{color:'rgba(255,255,255,0.65)'} }, tooltip: { backgroundColor:'rgba(10,15,35,0.9)', titleColor:'#fff', bodyColor:'rgba(255,255,255,0.75)', borderColor:'rgba(255,255,255,0.15)', borderWidth:1, callbacks: { label: c => c.dataset.label + ': ' + fmt(Math.round(c.raw)) + '원' } } }
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 20, color: 'rgba(255,255,255,0.35)', backdropColor: 'transparent', font: { size: 9 } },
+          grid: { color: 'rgba(255,255,255,0.08)' },
+          angleLines: { color: 'rgba(255,255,255,0.1)' },
+          pointLabels: {
+            color: ctx => {
+              const ktas = ctx.index + 1;
+              return D.kc[ktas] || 'rgba(255,255,255,0.8)';
+            },
+            font: { size: 12, weight: '700' }
+          }
+        }
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { color: 'rgba(255,255,255,0.65)', boxWidth: 10, padding: 8, font: { size: 11 } } },
+        tooltip: {
+          backgroundColor: 'rgba(10,15,35,0.9)', titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.75)',
+          borderColor: 'rgba(255,255,255,0.15)', borderWidth: 1,
+          callbacks: { label: c => `${c.dataset.label}: ${c.raw.toFixed(1)}%` }
+        }
+      }
     }
   });
 }
