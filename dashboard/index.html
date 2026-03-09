@@ -920,6 +920,7 @@ function renderAll() {
   renderKPI();
   renderDoctorRate();
   renderDoctorRevenue();
+  if (document.getElementById('doctorKpiTab').classList.contains('active')) renderDoctorKpi();
   renderRevenue();
   renderRevenueInfo();
   renderAdditionalTests();
