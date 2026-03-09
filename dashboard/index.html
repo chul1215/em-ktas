@@ -25,10 +25,9 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:14px;scroll-behavior:smooth}
-body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#060B18;color:var(--text-primary);line-height:1.5;min-height:100vh;position:relative;overflow-x:hidden}
-body::before{content:'';position:fixed;top:-20%;left:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(91,168,255,0.18) 0%,transparent 70%);border-radius:50%;z-index:0;animation:blobFloat 12s ease-in-out infinite;pointer-events:none}
-body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(56,217,245,0.12) 0%,transparent 70%);border-radius:50%;z-index:0;animation:blobFloat 15s ease-in-out infinite reverse;pointer-events:none}
-@keyframes blobFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(40px,-30px) scale(1.05)}50%{transform:translate(-20px,40px) scale(0.95)}75%{transform:translate(30px,20px) scale(1.03)}}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#060B18 url('../design/26-Tahoe-Light-6K-thumb.jpeg') center/cover fixed no-repeat;color:var(--text-primary);line-height:1.5;min-height:100vh;position:relative;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:rgba(6,11,24,0.72);z-index:0;pointer-events:none}
+body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(56,217,245,0.10) 0%,transparent 70%);border-radius:50%;z-index:0;pointer-events:none}
 /* HEADER */
 .header{background:rgba(6,11,24,0.7);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);color:#fff;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:100;box-shadow:0 4px 24px rgba(0,0,0,0.3);border-bottom:1px solid var(--glass-border)}
 .header-logo{font-size:18px;font-weight:700;display:flex;align-items:center;gap:10px}
@@ -379,7 +378,7 @@ body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:500px;height:
       <div id="roomiRoadmapTab" class="tab-content"></div>
     </div>
     <div class="card">
-      <div class="card-title">HIRA 삭감 리스크 분석</div>
+      <div class="card-title">심평원 삭감 위험도 분석</div>
       <div id="riskPanel"></div>
       <div style="margin-top:16px;padding:12px;background:rgba(255,255,255,0.05);border-radius:8px">
         <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:4px">적정처방 벤치마크 의사</div>
@@ -393,7 +392,7 @@ body::after{content:'';position:fixed;bottom:-15%;right:-10%;width:500px;height:
 <script>
 /* =============== DATA =============== */
 const D = {
-  kpi: {1:100, 2:100, 3:96, 4:80, 5:30},
+  kpi5cap: true, // KTAS 5는 '이하' 기준 (상한)
   kl: {1:'소생', 2:'긴급', 3:'응급', 4:'준응급', 5:'비응급'},
   kc: {1:'#5BA8FF', 2:'#38D9F5', 3:'#A78BFA', 4:'#FBBF24', 5:'#F472B6'},
   sets: {basic:{l:'응급실 기본 lab',c:158570,n:48},surgery:{l:'기본lab+입원추가(수술)',c:347550,n:56},elderly:{l:'기본lab+입원추가(고령+수술)',c:514830,n:69},mokdong:{l:'목동 기본 lab',c:205020,n:52}},
@@ -450,31 +449,33 @@ const D = {
 
   daejeon: {
     name:'대전선병원', period:'2025.07 ~ 2025.12',
-    s:{totalVisits:5512,totalPatients:5023,totalRevenue:965837380,avgRev:175228,admRate:45.7,labRate:94.0,docs:7},
+    kpi:{1:100,2:95,3:80,4:50,5:15},
+    price:{out:144040,adm:333020},
+    s:{totalVisits:8794,totalPatients:5023,totalRevenue:965817380,avgRev:109826,admRate:46.3,labRate:57.1,docs:7},
     ktas:{
-      1:{v:16,r:0.3,lp:14,lr:87.5,ar:37.5,avg:258150,med:259940,tr:4130392,ord:46.9,ac:6},
-      2:{v:313,r:5.7,lp:298,lr:96.4,ar:79.6,avg:258194,med:258692,tr:80814617,ord:52.0,ac:249},
-      3:{v:4460,r:80.9,lp:4012,lr:95.3,ar:48.5,avg:176265,med:168718,tr:786142825,ord:44.0,ac:2164},
-      4:{v:698,r:12.7,lp:545,lr:85.6,ar:13.6,avg:132528,med:129160,tr:92504641,ord:36.5,ac:95},
-      5:{v:24,r:0.4,lp:12,lr:57.1,ar:12.5,avg:92704,med:83705,tr:2224905,ord:25.2,ac:3}
+      1:{v:16,r:0.2,lp:16,lr:100.0,ar:37.5,avg:258150,med:259940,tr:4130392,ord:46.9,ac:6},
+      2:{v:321,r:3.98,lp:280,lr:87.2,ar:76.6,avg:251759,med:258756,tr:80814617,ord:52.5,ac:246},
+      3:{v:5547,r:68.74,lp:4059,lr:73.2,ar:36.3,avg:141724,med:171597,tr:786142825,ord:47.8,ac:2015},
+      4:{v:1993,r:24.7,lp:645,lr:32.4,ar:4.6,avg:46415,med:130636,tr:92504641,ord:37.4,ac:92},
+      5:{v:192,r:2.38,lp:22,lr:11.5,ar:1.6,avg:11588,med:83705,tr:2224905,ord:25.2,ac:3}
     },
-    em:{1:{v:16,lp:14,lr:87.5},2:{v:309,lp:298,lr:96.4},3:{v:4211,lp:4012,lr:95.3},4:{v:637,lp:545,lr:85.6},5:{v:21,lp:12,lr:57.1}},
+    em:{1:{v:16,lp:16,lr:100.0},2:{v:321,lp:280,lr:87.2},3:{v:5547,lp:4059,lr:73.2},4:{v:1993,lp:645,lr:32.4},5:{v:192,lp:22,lr:11.5}},
     rev:{
-      1:{out:{c:1583979,k:1585700},adm:{c:1843004,k:3088980}},
-      2:{out:{c:14250000,k:10148480},adm:{c:56811613,k:128192670}},
-      3:{out:{c:311422380,k:349513651},adm:{c:379215853,k:1114092120}},
-      4:{out:{c:66919280,k:76494168},adm:{c:13869035,k:48908850}},
-      5:{out:{c:1842110,k:1141704},adm:{c:0,k:0}}
+      1:{out:{c:2029057,k:1440400},adm:{c:2101335,k:1998120}},
+      2:{out:{c:16284376,k:10262850},adm:{c:64530241,k:81922920}},
+      3:{out:{c:357601086,k:406999424},adm:{c:428541739,k:671035300}},
+      4:{out:{c:77420185,k:136910020},adm:{c:15084456,k:30637840}},
+      5:{out:{c:1661070,k:4083534},adm:{c:563835,k:0}}
     },
-    rt:{out:{c:396017749,k:438883703,d:-42865954,r:-9.8},adm:{c:451739505,k:1294282620,d:-842543115,r:-65.1}},
+    rt:{out:{c:454995774,k:559696228,d:-104700454,r:-18.7},adm:{c:510821606,k:785594180,d:-274772574,r:-35.0}},
     docs:[
-      {n:'전가람',p:902,o:46,avg:193319,med:199512,bla:40.6,kr:{1:87.5,2:97.3,3:96.3,4:92.1,5:85.6},tr:95.8},
-      {n:'정용택',p:736,o:45,avg:181462,med:176969,bla:39.1,kr:{1:87.5,2:97.3,3:96.0,4:89.0,5:85.6},tr:95.1},
-      {n:'홍승우',p:985,o:44,avg:170487,med:151734,bla:39.5,kr:{1:87.5,2:97.3,3:95.4,4:80.6,5:51.4},tr:93.5},
-      {n:'양중일',p:698,o:42,avg:167923,med:155147,bla:37.6,kr:{1:87.5,2:95.1,3:95.4,4:86.8,5:85.6},tr:94.2},
-      {n:'정원익',p:802,o:42,avg:165436,med:154594,bla:36.9,kr:{1:null,2:95.0,3:95.3,4:90.6,5:85.6},tr:94.7},
-      {n:'도현수',p:607,o:41,avg:167875,med:167739,bla:36.3,kr:{1:null,2:97.3,3:94.4,4:72.7,5:17.1},tr:90.8},
-      {n:'주기혁',p:546,o:40,avg:165960,med:168718,bla:35.8,kr:{1:87.5,2:95.2,3:93.7,4:88.3,5:42.8},tr:93.2}
+      {n:'홍승우',p:984,o:44,avg:170640,med:151734,bla:39.5,kr:{1:100.0,2:83.7,3:71.0,4:29.7,5:11.2},tr:60.0},
+      {n:'전가람',p:902,o:46,avg:193319,med:199512,bla:40.6,kr:{1:75.4,2:93.9,3:71.2,4:28.7,5:12.6},tr:60.2},
+      {n:'정원익',p:802,o:42,avg:165436,med:154594,bla:36.9,kr:{1:null,2:78.4,3:72.6,4:28.4,5:7.3},tr:60.4},
+      {n:'정용택',p:736,o:45,avg:181462,med:176969,bla:39.1,kr:{1:100.0,2:82.8,3:70.8,4:31.9,5:3.8},tr:60.2},
+      {n:'양중일',p:698,o:42,avg:167923,med:155147,bla:37.6,kr:{1:50.6,2:88.3,3:69.7,4:34.5,5:8.4},tr:60.2},
+      {n:'도현수',p:607,o:41,avg:167875,med:167739,bla:36.3,kr:{1:null,2:90.8,3:67.8,4:38.7,5:19.6},tr:60.4},
+      {n:'주기혁',p:546,o:40,avg:165960,med:168718,bla:35.8,kr:{1:100.0,2:100.0,3:72.8,4:21.4,5:10.8},tr:59.8}
     ],
     addTests:[
       {cd:'KL1102',nm:'심전도병실왕진',cnt:3361,pt:3026,cat:'심장'},
@@ -501,59 +502,61 @@ const D = {
       {cd:'L3069',nm:'MAGNESIUM',cnt:9,up:1660,t:15300}
     ],
     roomi:{
-      sum:`<p>안녕하세요, ROOMi예요. 대전선병원 응급실 분석 결과를 말씀드릴게요. <strong>기본검사 처방율이 94.0%</strong>로 정말 높은 수준을 유지하고 계세요. 표준화된 오더세트 운영과 EM 의사 7명 선생님들의 균일한 처방 패턴(환자당 40~46건) 덕분이에요.</p><p>다만 재설계 KPI 기준으로 보면, KTAS 3등급 처방율(95.3%)이 <strong>외래 KPI 목표(96%)에 살짝 못 미치고 있어서</strong> 조금만 더 보완해 주시면 좋겠어요. 그리고 KTAS 5등급(57.1%)은 KPI 목표(30%)보다 꽤 높아서, 과잉처방 부분은 꼭 챙겨주셔야 해요.</p><p>KTAS 3등급이 전체 수익의 <strong>81.5%</strong>를 차지하는 가장 중요한 구간이고요, 수익 구조는 <strong>외래/입원 이원화 KPI</strong> 체계로 전환되었답니다.</p><p><strong>ROOMi의 핵심 의견:</strong> 외래 처방율 보완과 함께, <em>입원환자 추가검사 패키지(514,830원) 표준화</em>가 수익 향상의 열쇠라고 생각해요!</p>`,
+      sum:`<p>안녕하세요, ROOMi예요. 대전선병원 응급실 분석 결과를 말씀드릴게요. 전체 내원환자수 기준으로 재분석한 결과, <strong>기본검사 처방율이 57.1%</strong>로 나타났어요. 6개월간 총 8,794건의 내원 중 혈액검사를 받은 환자는 5,023명이에요.</p><p>KTAS 등급별로 보면, <strong>KTAS 1(100%)은 목표 달성</strong>, KTAS 2(87.2%, 목표 95%)는 거의 근접해 있어요. 하지만 <strong>KTAS 3(73.2%, 목표 80%)</strong>, <strong>KTAS 4(32.4%, 목표 50%)</strong>는 아직 KPI에 미달이에요. KTAS 5(11.5%)는 목표(15% 이하)를 충족하고 있어요.</p><p>KTAS 3등급이 전체 수익의 <strong>81.4%</strong>를 차지하는 가장 중요한 구간인데, 처방율이 73.2%에 머물러 있어서 개선 여지가 크답니다. 수익 구조는 <strong>외래/입원 이원화 KPI</strong> 체계 기준으로, 외래 기준 1.0억원, 입원 기준 2.7억원의 개선 여력이 있어요.</p><p><strong>ROOMi의 핵심 의견:</strong> KTAS 3·4 처방율 향상이 최우선 과제예요! 특히 KTAS 3 외래 처방율을 80%까지 끌어올리고, <em>입원환자 추가검사 패키지(333,020원) 표준화</em>를 병행하면 수익이 크게 개선될 거예요!</p>`,
       recs:[
-        {p:1,t:'KTAS 3 입원환자 추가검사 표준화',e:'+7.35억원',d:'중',r:'낮음',desc:'입원환자 2,164건 × 514,830원. 수익 향상 핵심.'},
-        {p:2,t:'KTAS 2 입원환자 추가검사 표준화',e:'+0.71억원',d:'중',r:'낮음',desc:'입원율 79.6% 중증환자 249건 대상.'},
-        {p:3,t:'KTAS 3 외래 처방율 보완',e:'+α',d:'중',r:'낮음',desc:'95.3%→96%. 외래환자 기본lab 처방 누락 방지.'},
-        {p:4,t:'KTAS 5 기본lab 자동오더 해제',e:'삭감방지',d:'하',r:'리스크↓',desc:'57.1%→30%. EMR 경고 팝업 도입.'},
-        {p:5,t:'입원 예측 환자 사전 추가검사',e:'+α',d:'상',r:'낮음',desc:'KTAS 2 입원율 79.6% 활용.'}
+        {p:1,t:'KTAS 3 외래 처방율 향상',e:'+0.5억원',d:'중',r:'낮음',desc:'73.2%→80%. 외래환자 기본lab(144,040원) 처방 누락 방지.'},
+        {p:2,t:'KTAS 3 입원환자 추가검사 표준화',e:'+2.4억원',d:'중',r:'낮음',desc:'입원환자 2,015건 × 333,020원. 수익 향상 핵심.'},
+        {p:3,t:'KTAS 4 처방율 향상',e:'+0.6억원',d:'중',r:'낮음',desc:'32.4%→50%. 1,993건 대규모 환자군 처방율 개선.'},
+        {p:4,t:'KTAS 2 처방율 향상',e:'+α',d:'중',r:'낮음',desc:'87.2%→95%. 중증환자 321건 검사 누락 방지.'},
+        {p:5,t:'입원환자 추가검사 프로토콜 확립',e:'+α',d:'상',r:'낮음',desc:'KTAS 2 입원율 76.6% 활용, 입원 연계 수익 극대화.'}
       ],
       rm:{
-        p1:{t:'즉시 실행 (1개월 내)',items:['KTAS 5 기본lab 자동오더 해제 및 경고 팝업','KTAS 3 입원환자 추가검사 세트(514,830원) 구축','KTAS 3 외래 처방율 96% 달성 모니터링']},
-        p2:{t:'단기 실행 (1~3개월)',items:['KTAS 2 입원환자 추가검사 프로토콜','의사별 외래/입원 처방율 분리 모니터링','의사 간 처방 편차 가이드라인']},
-        p3:{t:'중기 실행 (3~6개월)',items:['외래/입원 이원화 KPI 전면 적용','KPI 기반 의사별 피드백 시스템','HIRA 사전심사 체계 구축']}
+        p1:{t:'즉시 실행 (1개월 내)',items:['KTAS 3 외래 기본lab 처방율 모니터링 시작(73.2%→80%)','KTAS 3 입원환자 추가검사 세트(333,020원) 구축','KTAS 4 처방율 개선 캠페인 시작(32.4%→40%)']},
+        p2:{t:'단기 실행 (1~3개월)',items:['KTAS 3 처방율 80% KPI 달성 유지','의사별 KTAS별 처방율 분리 모니터링','KTAS 2 처방율 95% 달성 방안 수립']},
+        p3:{t:'중기 실행 (3~6개월)',items:['KTAS 4 처방율 50% KPI 달성','외래/입원 이원화 KPI 전면 적용','KPI 기반 의사별 피드백 시스템 구축']}
       },
       risks:[
-        {n:'KTAS 5 과잉검사',lv:'높음',cur:'57.1% (KPI 30%)',amt:'~920만원',pct:80},
-        {n:'KTAS 4 과잉검사',lv:'낮음',cur:'85.6% (KPI 80%)',amt:'-',pct:15},
-        {n:'KTAS 3 일괄처방',lv:'낮음',cur:'95.3% (KPI 96%)',amt:'-',pct:10},
-        {n:'의사 간 편차',lv:'낮음',cur:'최대 16.8%',amt:'-',pct:20}
+        {n:'KTAS 4 처방율 미달',lv:'매우 높음',cur:'32.4% (KPI 50%)',amt:'~0.6억원 기회손실',pct:90},
+        {n:'KTAS 3 처방율 미달',lv:'높음',cur:'73.2% (KPI 80%)',amt:'~0.5억원 기회손실',pct:70},
+        {n:'KTAS 2 처방율 미달',lv:'중간',cur:'87.2% (KPI 95%)',amt:'-',pct:30},
+        {n:'의사 간 편차',lv:'낮음',cur:'KTAS 3 기준 최대 5.0%p',amt:'-',pct:15}
       ],
-      bench:'도현수 (KTAS 4: 72.7%, KTAS 5: 17.1%)'
+      bench:'주기혁 (KTAS 3: 72.8%, KTAS 2: 100.0%)'
     }
   },
 
   yuseong: {
     name:'유성선병원', period:'2025.07 ~ 2025.12',
-    s:{totalVisits:10253,totalPatients:9394,totalRevenue:1530942897,avgRev:149317,admRate:29.5,labRate:91.6,docs:10},
+    kpi:{1:95,2:95,3:80,4:50,5:15},
+    price:{out:158570,adm:514830},
+    s:{totalVisits:13668,totalPatients:7014,totalRevenue:1530942897,avgRev:112014,admRate:30.7,labRate:51.3,docs:10},
     ktas:{
-      1:{v:90,r:0.88,lp:80,lr:89.9,ar:51.1,avg:339345,med:330470,tr:30541091,ord:50.5,ac:46},
-      2:{v:601,r:5.86,lp:540,lr:89.9,ar:66.6,avg:308268,med:302580,tr:185269009,ord:51.0,ac:400},
-      3:{v:7477,r:72.92,lp:5758,lr:77.0,ar:33.7,avg:152464,med:146541,tr:1139973580,ord:36.7,ac:2519},
-      4:{v:1956,r:19.08,lp:1098,lr:56.1,ar:2.8,avg:84859,med:78600,tr:165983299,ord:22.7,ac:55},
-      5:{v:129,r:1.26,lp:55,lr:42.6,ar:0.8,avg:71131,med:19300,tr:9175918,ord:17.8,ac:1}
+      1:{v:90,r:0.69,lp:68,lr:75.6,ar:50.0,avg:339345,med:340701,tr:30541091,ord:51.7,ac:45},
+      2:{v:610,r:4.66,lp:483,lr:79.2,ar:64.4,avg:303720,med:307728,tr:185269009,ord:52.0,ac:393},
+      3:{v:7819,r:59.72,lp:5384,lr:68.9,ar:31.1,avg:145795,med:147694,tr:1139973580,ord:39.1,ac:2431},
+      4:{v:4125,r:31.51,lp:1028,lr:24.9,ar:1.3,avg:40238,med:78600,tr:165983299,ord:23.5,ac:54},
+      5:{v:448,r:3.42,lp:51,lr:11.4,ar:0.2,avg:20482,med:19660,tr:9175918,ord:18.5,ac:1}
     },
-    em:{1:{v:89,lp:80,lr:89.9},2:{v:555,lp:539,lr:97.1},3:{v:6132,lp:5754,lr:93.8},4:{v:1362,lp:1098,lr:80.6},5:{v:76,lp:55,lr:72.4}},
+    em:{1:{v:90,lp:68,lr:75.6},2:{v:610,lp:483,lr:79.2},3:{v:7819,lp:5384,lr:68.9},4:{v:4125,lp:1028,lr:24.9},5:{v:448,lp:51,lr:11.4}},
     rev:{
-      1:{out:{c:5714500,k:6977080},adm:{c:19844740,k:23682180}},
-      2:{out:{c:29590015,k:31872570},adm:{c:131338292,k:205932000}},
-      3:{out:{c:457073165,k:754742458},adm:{c:502058373,k:1296856770}},
-      4:{out:{c:133360550,k:241153256},adm:{c:9908860,k:28315650}},
-      5:{out:{c:7509740,k:6136659},adm:{c:0,k:0}}
+      1:{out:{c:8427988,k:6778868},adm:{c:22113103,k:23167350}},
+      2:{out:{c:38103230,k:32689206},adm:{c:147165779,k:202328190}},
+      3:{out:{c:568982566,k:683501128},adm:{c:570991014,k:1251551730}},
+      4:{out:{c:155349860,k:322769235},adm:{c:10633439,k:27800820}},
+      5:{out:{c:8860132,k:10632119},adm:{c:315786,k:0}}
     },
-    rt:{out:{c:633247970,k:1040882023,d:-407634053,r:-39.2},adm:{c:663150265,k:1554786600,d:-891636335,r:-57.4}},
+    rt:{out:{c:779723776,k:1056370556,d:-276646780,r:-26.2},adm:{c:751219121,k:1504848090,d:-753628969,r:-50.1}},
     docs:[
-      {n:'김건동',p:965,o:43,avg:173030,med:152164,bla:37.6,kr:{1:89.9,2:99.1,3:94.2,4:83.3,5:63.5},tr:92.5},
-      {n:'류승우',p:919,o:43,avg:197001,med:172544,bla:38.5,kr:{1:89.9,2:99.1,3:93.5,4:82.3,5:84.7},tr:91.8},
-      {n:'송경혁',p:914,o:40,avg:163687,med:136640,bla:35.8,kr:{1:89.9,2:97.5,3:94.5,4:83.5,5:84.7},tr:92.5},
-      {n:'이승한',p:903,o:40,avg:155154,med:127894,bla:35.9,kr:{1:89.9,2:94.4,3:94.4,4:81.4,5:84.7},tr:92.2},
-      {n:'안경찬',p:892,o:39,avg:156979,med:140036,bla:36.1,kr:{1:89.9,2:95.7,3:93.7,4:76.7,5:77.7},tr:91.2},
-      {n:'민동규',p:868,o:40,avg:148564,med:130754,bla:36.9,kr:{1:89.9,2:99.1,3:94.1,4:80.4,5:65.9},tr:91.4},
-      {n:'최윤혁',p:863,o:40,avg:159735,med:132214,bla:36.1,kr:{1:89.9,2:96.1,3:92.7,4:83.8,5:84.7},tr:91.3},
-      {n:'양의석',p:791,o:43,avg:174024,med:158064,bla:39.6,kr:{1:89.9,2:94.9,3:93.8,4:82.9,5:76.2},tr:91.7},
-      {n:'박현욱',p:736,o:41,avg:170502,med:155128,bla:38.0,kr:{1:89.9,2:97.1,3:93.8,4:72.8,5:36.3},tr:90.7},
-      {n:'한규홍',p:576,o:40,avg:150444,med:165934,bla:35.4,kr:{1:null,2:99.1,3:93.6,4:73.2,5:63.5},tr:90.1}
+      {n:'김건동',p:965,o:43,avg:173030,med:152164,bla:37.6,kr:{1:37.5,2:87.2,3:68.5,4:25.6,5:7.5},tr:53.5},
+      {n:'류승우',p:919,o:43,avg:197001,med:172544,bla:38.5,kr:{1:82.2,2:74.3,3:68.6,4:26.9,5:2.1},tr:53.5},
+      {n:'송경혁',p:914,o:40,avg:163687,med:136640,bla:35.8,kr:{1:100.0,2:81.9,3:65.5,4:28.2,5:28.9},tr:53.5},
+      {n:'이승한',p:903,o:40,avg:155154,med:127894,bla:35.9,kr:{1:82.3,2:54.6,3:71.2,4:24.7,5:4.1},tr:53.5},
+      {n:'안경찬',p:892,o:39,avg:156979,med:140036,bla:36.1,kr:{1:100.0,2:100.0,3:67.9,4:18.9,5:19.3},tr:52.5},
+      {n:'민동규',p:868,o:40,avg:148564,med:130754,bla:36.9,kr:{1:32.7,2:64.4,3:67.8,4:30.2,5:8.8},tr:53.5},
+      {n:'최윤혁',p:863,o:40,avg:159735,med:132214,bla:36.1,kr:{1:100.0,2:90.5,3:66.6,4:26.3,5:8.8},tr:53.2},
+      {n:'양의석',p:791,o:43,avg:174024,med:158064,bla:39.6,kr:{1:47.1,2:69.5,3:68.9,4:26.2,5:16.6},tr:53.5},
+      {n:'박현욱',p:736,o:41,avg:170502,med:155128,bla:38.0,kr:{1:76.0,2:84.1,3:72.9,4:16.9,5:7.6},tr:53.5},
+      {n:'한규홍',p:576,o:40,avg:150444,med:165934,bla:35.4,kr:{1:null,2:58.1,3:72.1,4:23.6,5:9.9},tr:53.9}
     ],
     addTests:[
       {cd:'KL1102',nm:'심전도병실왕진',cnt:5333,pt:5227,cat:'심장'},
@@ -577,26 +580,26 @@ const D = {
       {cd:'L80460',nm:'CO-Oximeter',cnt:7,up:12490,t:89180}
     ],
     roomi:{
-      sum:`<p>안녕하세요, ROOMi예요. 유성선병원 응급실 분석 결과를 말씀드릴게요. 6개월간 <strong>10,253건의 내원에 총 15.3억원의 검사 수익</strong>을 달성하셨어요. 대전선병원보다 약 1.86배 큰 규모랍니다.</p><p>재설계 KPI 기준으로 살펴보면, KTAS 5등급 처방율 72.4%(KPI 30%)는 <strong>과잉처방이 좀 심각한 상황</strong>이에요. KTAS 4등급 80.6%(KPI 80%)는 목표에 잘 맞추고 계시는데, <strong>KTAS 3등급 93.8%(KPI 96%)는 목표에 아직 미달</strong>이라 외래 처방 보완이 필요해요.</p><p>내원건당 평균금액(149,317원)이 대전(175,228원)보다 <strong>14.8% 낮은 편</strong>이어서, 환자수는 1.86배인데 수익은 1.59배에 머물고 있는 점이 아쉬워요.</p><p><strong>ROOMi의 핵심 의견:</strong> KTAS 5 과잉처방 시정과 KTAS 3 외래 처방율 보완을 함께 진행하시면서, <em>입원환자 추가검사 패키지(514,830원) 표준화</em>로 건당 수익을 높여가시면 좋겠어요!</p>`,
+      sum:`<p>안녕하세요, ROOMi예요. 유성선병원 응급실 분석 결과를 말씀드릴게요. 전체 내원환자수 기준으로 재분석한 결과, 6개월간 <strong>13,668건의 내원에 총 15.3억원의 검사 수익</strong>을 기록하셨어요. 기본검사 처방율은 <strong>51.3%</strong>로, 대전선병원(57.1%)보다 낮은 편이에요.</p><p>KTAS 등급별로 보면, <strong>KTAS 1(75.6%, 목표 95%)</strong>, KTAS 2(79.2%, 목표 95%), <strong>KTAS 3(68.9%, 목표 80%)</strong>, <strong>KTAS 4(24.9%, 목표 50%)</strong> 모두 KPI 목표에 미달하고 있어요. KTAS 5(11.4%)는 목표(15% 이하)를 충족하고 있어요.</p><p>특히 KTAS 4 환자수가 4,125건으로 대전(1,993건)의 2배인데 처방율이 24.9%에 불과해서 <strong>개선 여지가 매우 크답니다</strong>. 내원건당 평균금액(112,014원)도 대전(109,826원)과 비슷한 수준이에요.</p><p><strong>ROOMi의 핵심 의견:</strong> KTAS 3·4 처방율 향상이 가장 시급해요! KTAS 3 처방율을 80%까지, KTAS 4를 50%까지 끌어올리면서 <em>입원환자 추가검사 패키지(514,830원) 표준화</em>를 병행하시면 좋겠어요!</p>`,
       recs:[
-        {p:1,t:'KTAS 3 입원환자 추가검사 표준화',e:'+7.95억원',d:'중',r:'낮음',desc:'입원환자 2,519건 × 514,830원. 최대 수익 기여 항목.'},
-        {p:2,t:'KTAS 5 과잉처방 즉각 시정',e:'삭감방지',d:'하',r:'리스크↓↓',desc:'72.4%→30%. 4명 의사 100% 처방 즉각 교정.'},
-        {p:3,t:'KTAS 3 외래 처방율 보완',e:'+α',d:'중',r:'낮음',desc:'93.8%→96%. 외래환자 기본lab 처방 누락 방지.'},
-        {p:4,t:'의사 간 처방 편차 축소',e:'+5~10%',d:'상',r:'리스크↓',desc:'편차 32.6%→20% 이내. 류승우 vs 민동규.'},
-        {p:5,t:'내원건당 수익 제고 (대전 벤치마크)',e:'+2.6억원',d:'상',r:'중간',desc:'149,317원→175,228원 달성.'}
+        {p:1,t:'KTAS 3 외래 처방율 향상',e:'+1.1억원',d:'중',r:'낮음',desc:'68.9%→80%. 외래환자 기본lab(158,570원) 처방 누락 방지.'},
+        {p:2,t:'KTAS 3 입원환자 추가검사 표준화',e:'+6.8억원',d:'중',r:'낮음',desc:'입원환자 2,431건 × 514,830원. 최대 수익 기여 항목.'},
+        {p:3,t:'KTAS 4 처방율 향상',e:'+1.7억원',d:'중',r:'낮음',desc:'24.9%→50%. 4,125건 대규모 환자군 처방율 개선.'},
+        {p:4,t:'KTAS 1·2 처방율 향상',e:'+α',d:'중',r:'낮음',desc:'KTAS 1(75.6%→95%), KTAS 2(79.2%→95%). 중증환자 검사 누락 방지.'},
+        {p:5,t:'입원환자 추가검사 프로토콜 확립',e:'+α',d:'상',r:'낮음',desc:'KTAS 2 입원율 64.4% 활용, 입원 연계 수익 극대화.'}
       ],
       rm:{
-        p1:{t:'즉시 실행 (1개월 내)',items:['KTAS 5 기본lab 자동오더 해제 및 사유입력 의무화','KTAS 5 처방율 100% 의사 4명 개별 면담','KTAS 3 입원환자 추가검사 세트(514,830원) 구축']},
-        p2:{t:'단기 실행 (1~3개월)',items:['KTAS 3 외래 처방율 96% 달성 방안 수립','의사별 외래/입원 처방율 분리 모니터링','KTAS 분류 정확도 내부 감사']},
-        p3:{t:'중기 실행 (3~6개월)',items:['외래/입원 이원화 KPI 전면 적용','대전-유성 교차 벤치마킹 정례화','의사 간 편차 32.6%→20% 축소']}
+        p1:{t:'즉시 실행 (1개월 내)',items:['KTAS 3 외래 기본lab 처방율 모니터링 시작(68.9%→75%)','KTAS 3 입원환자 추가검사 세트(514,830원) 구축','KTAS 4 처방율 개선 캠페인 시작(24.9%→35%)']},
+        p2:{t:'단기 실행 (1~3개월)',items:['KTAS 3 처방율 80% KPI 달성','KTAS 1·2 처방율 95% 달성 방안 수립','의사별 KTAS별 처방율 분리 모니터링']},
+        p3:{t:'중기 실행 (3~6개월)',items:['KTAS 4 처방율 50% KPI 달성','외래/입원 이원화 KPI 전면 적용','대전-유성 교차 벤치마킹 정례화']}
       },
       risks:[
-        {n:'KTAS 5 과잉검사',lv:'매우 높음',cur:'72.4% (KPI 30%)',amt:'~750만원',pct:95},
-        {n:'KTAS 4 적정범위',lv:'낮음',cur:'80.6% (KPI 80%)',amt:'-',pct:10},
-        {n:'KTAS 3 일괄처방',lv:'낮음',cur:'93.8% (KPI 96%)',amt:'-',pct:10},
-        {n:'의사 간 편차',lv:'중간',cur:'최대 32.6%',amt:'불확실',pct:45}
+        {n:'KTAS 4 처방율 미달',lv:'매우 높음',cur:'24.9% (KPI 50%)',amt:'~1.7억원 기회손실',pct:90},
+        {n:'KTAS 3 처방율 미달',lv:'높음',cur:'68.9% (KPI 80%)',amt:'~1.1억원 기회손실',pct:70},
+        {n:'KTAS 1·2 처방율 미달',lv:'중간',cur:'75.6%/79.2% (KPI 95%)',amt:'-',pct:40},
+        {n:'의사 간 편차',lv:'중간',cur:'KTAS 3 기준 최대 7.4%p',amt:'-',pct:25}
       ],
-      bench:'박현욱 (KTAS 4: 72.8%, KTAS 5: 36.3%)'
+      bench:'박현욱 (KTAS 3: 72.9%, 가장 높은 처방율)'
     }
   }
 };
@@ -617,9 +620,9 @@ const fmtPct = n => n == null ? '-' : n.toFixed(1) + '%';
 const h = D[H]; // alias, refreshed on switch
 
 function hmClass(val, ktas) {
-  const target = D.kpi[ktas];
+  const target = D[H].kpi[ktas];
   if (val == null) return 'hm hm-x';
-  if (ktas >= 4 && val > target * 1.5) return 'hm hm-o';
+  if (ktas === 5) return val <= target ? 'hm hm-g' : 'hm hm-o'; // 5등급은 '이하' 기준
   if (val >= target) return 'hm hm-g';
   return 'hm hm-r';
 }
@@ -643,14 +646,14 @@ function renderKPI() {
     <div class="kpi-card"><div class="kpi-label">총 내원건수</div><div class="kpi-value">${fmt(s.totalVisits)}<span style="font-size:14px">건</span></div><div class="kpi-sub">월평균 ${fmt(Math.round(s.totalVisits/6))}건 · 고유환자 ${fmt(s.totalPatients)}명</div></div>
     <div class="kpi-card"><div class="kpi-label">기본lab 처방율</div><div class="kpi-value">${s.labRate}%</div><div class="kpi-sub">EM 의사 ${s.docs}명 기준</div></div>
     <div class="kpi-card"><div class="kpi-label">내원건당 평균금액</div><div class="kpi-value">${fmt(s.avgRev)}<span style="font-size:14px">원</span></div><div class="kpi-sub">총 수익 ${fmtW(s.totalRevenue)}원</div></div>
-    <div class="kpi-card"><div class="kpi-label">총 검사수익 (6개월)</div><div class="kpi-value">${(s.totalRevenue/1e8).toFixed(1)}<span style="font-size:14px">억원</span></div><div class="kpi-sub">기본lab 158,570원/건 기준</div></div>
+    <div class="kpi-card"><div class="kpi-label">총 검사수익 (6개월)</div><div class="kpi-value">${(s.totalRevenue/1e8).toFixed(1)}<span style="font-size:14px">억원</span></div><div class="kpi-sub">기본lab ${fmt(D[H].price.out)}원/건 기준</div></div>
     <div class="kpi-card"><div class="kpi-label">입원율</div><div class="kpi-value">${s.admRate}%</div><div class="kpi-sub">전체 ${fmt(s.totalVisits)}건 중</div></div>`;
 }
 
 function renderDoctorRate() {
   const docs = D[H].docs;
   let hdr = '<th>의사명</th><th class="c">환자수</th>';
-  for (let k=1; k<=5; k++) hdr += `<th class="c">KTAS ${k}<br><span style="font-size:10px;color:rgba(255,255,255,0.5)">KPI ${D.kpi[k]}%</span></th>`;
+  for (let k=1; k<=5; k++) hdr += `<th class="c">KTAS ${k}<br><span style="font-size:10px;color:rgba(255,255,255,0.5)">KPI ${D[H].kpi[k]}%</span></th>`;
   hdr += '<th class="c">전체</th>';
   let rows = docs.map(d => {
     let r = `<tr><td class="bold">${d.n}</td><td class="c">${fmt(d.p)}</td>`;
@@ -729,8 +732,8 @@ function renderRevenue(scenario) {
 function renderRevenueInfo() {
   const rt = D[H].rt;
   const scenarios = [
-    {key:'out', label:'외래', icon:'&#9662;', desc:'외래환자 기본lab(158,570원) 기준'},
-    {key:'adm', label:'입원연계', icon:'&#9650;', desc:'입원환자 추가검사(514,830원) 기준'}
+    {key:'out', label:'외래', icon:'&#9662;', desc:`외래환자 기본lab(${fmt(D[H].price.out)}원) 기준`},
+    {key:'adm', label:'입원연계', icon:'&#9650;', desc:`입원환자 추가검사(${fmt(D[H].price.adm)}원) 기준`}
   ];
   const maxK = Math.max(...scenarios.map(s => rt[s.key].k));
   const html = scenarios.map(s => {
@@ -799,7 +802,7 @@ function renderTestSets() {
       ${boldGroups.map(g => renderGroup(g)).join('')}
     </div>
     <div style="margin-top:16px;padding:12px;background:rgba(91,168,255,0.1);border-radius:8px;font-size:12px;color:#5BA8FF;border:1px solid rgba(91,168,255,0.15)">
-      <strong>입원시 추가 패키지:</strong> 기본lab(158,570원, 48항목)에 입원시 추가 18개 항목(356,260원)을 더한 514,830원(69항목) 단일 기준 적용.
+      <strong>입원시 추가 패키지:</strong> 기본lab(${fmt(D[H].price.out)}원, 48항목)에 입원시 추가 항목을 더한 ${fmt(D[H].price.adm)}원 기준 적용.
     </div>`;
 }
 
@@ -847,7 +850,7 @@ function renderROOMi() {
   </div>
   <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:16px">
     <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.9);margin-bottom:8px">KTAS 등급별 처방율 vs KPI <span style="font-size:10px;color:rgba(255,255,255,0.5);font-weight:400">(| = KPI 목표)</span></div>
-    ${[1,2,3,4,5].map(k => miniGauge(k, D.kc[k], em[k].lr, D.kpi[k])).join('')}
+    ${[1,2,3,4,5].map(k => miniGauge(k, D.kc[k], em[k].lr, D[H].kpi[k])).join('')}
   </div>`;
   document.getElementById('roomiHospital').textContent = D[H].name;
   document.getElementById('roomiSummaryTab').innerHTML = infographic + `<div class="roomi-body">${rm.sum}</div>`;

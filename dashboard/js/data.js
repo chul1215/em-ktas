@@ -1,4 +1,5 @@
 const DASHBOARD_DATA = {
+  // KPI 3차 변경: 병원별 개별 KPI 적용 (kpiTargets는 레거시, 각 병원의 kpi 필드 참조)
   kpiTargets: { 1: 100, 2: 100, 3: 96, 4: 80, 5: 30 },
   ktasLabels: { 1: '소생', 2: '긴급', 3: '응급', 4: '준응급', 5: '비응급' },
   ktasColors: {
@@ -14,51 +15,53 @@ const DASHBOARD_DATA = {
   daejeon: {
     name: '대전선병원',
     period: '2025.07 ~ 2025.12',
+    kpi: { 1: 100, 2: 95, 3: 80, 4: 50, 5: 15 },
+    price: { out: 144040, adm: 333020 },
     summary: {
-      totalVisits: 5512,
+      totalVisits: 8794,
       totalPatients: 5023,
-      totalRevenue: 965837380,
-      avgRevenuePerVisit: 175228,
-      admissionRate: 45.7,
-      basicLabRate: 94.0,
+      totalRevenue: 965817380,
+      avgRevenuePerVisit: 109826,
+      admissionRate: 46.3,
+      basicLabRate: 57.1,
       emDoctorCount: 7,
       totalOrders: 239432,
       avgStayHours: 2.5
     },
     ktas: {
-      1: { visits: 16, ratio: 0.3, labPrescribed: 14, currentLabRate: 87.5, admissionRate: 37.5, avgRevenue: 258150, medianRevenue: 259940, totalRevenue: 4130392, avgOrders: 46.9, admissionCount: 6 },
-      2: { visits: 313, ratio: 5.7, labPrescribed: 298, currentLabRate: 96.4, admissionRate: 79.6, avgRevenue: 258194, medianRevenue: 258692, totalRevenue: 80814617, avgOrders: 52.0, admissionCount: 249 },
-      3: { visits: 4460, ratio: 80.9, labPrescribed: 4012, currentLabRate: 95.3, admissionRate: 48.5, avgRevenue: 176265, medianRevenue: 168718, totalRevenue: 786142825, avgOrders: 44.0, admissionCount: 2164 },
-      4: { visits: 698, ratio: 12.7, labPrescribed: 545, currentLabRate: 85.6, admissionRate: 13.6, avgRevenue: 132528, medianRevenue: 129160, totalRevenue: 92504641, avgOrders: 36.5, admissionCount: 95 },
-      5: { visits: 24, ratio: 0.4, labPrescribed: 12, currentLabRate: 57.1, admissionRate: 12.5, avgRevenue: 92704, medianRevenue: 83705, totalRevenue: 2224905, avgOrders: 25.2, admissionCount: 3 }
+      1: { visits: 16, ratio: 0.2, labPrescribed: 16, currentLabRate: 100.0, admissionRate: 37.5, avgRevenue: 258150, medianRevenue: 259940, totalRevenue: 4130392, avgOrders: 46.9, admissionCount: 6 },
+      2: { visits: 321, ratio: 3.98, labPrescribed: 280, currentLabRate: 87.2, admissionRate: 76.6, avgRevenue: 251759, medianRevenue: 258756, totalRevenue: 80814617, avgOrders: 52.5, admissionCount: 246 },
+      3: { visits: 5547, ratio: 68.74, labPrescribed: 4059, currentLabRate: 73.2, admissionRate: 36.3, avgRevenue: 141724, medianRevenue: 171597, totalRevenue: 786142825, avgOrders: 47.8, admissionCount: 2015 },
+      4: { visits: 1993, ratio: 24.7, labPrescribed: 645, currentLabRate: 32.4, admissionRate: 4.6, avgRevenue: 46415, medianRevenue: 130636, totalRevenue: 92504641, avgOrders: 37.4, admissionCount: 92 },
+      5: { visits: 192, ratio: 2.38, labPrescribed: 22, currentLabRate: 11.5, admissionRate: 1.6, avgRevenue: 11588, medianRevenue: 83705, totalRevenue: 2224905, avgOrders: 25.2, admissionCount: 3 }
     },
     // EM-only revenue data for scenarios
     emKtas: {
-      1: { visits: 16, labPrescribed: 14, currentLabRate: 87.5 },
-      2: { visits: 309, labPrescribed: 298, currentLabRate: 96.4 },
-      3: { visits: 4211, labPrescribed: 4012, currentLabRate: 95.3 },
-      4: { visits: 637, labPrescribed: 545, currentLabRate: 85.6 },
-      5: { visits: 21, labPrescribed: 12, currentLabRate: 57.1 }
+      1: { visits: 16, labPrescribed: 16, currentLabRate: 100.0 },
+      2: { visits: 321, labPrescribed: 280, currentLabRate: 87.2 },
+      3: { visits: 5547, labPrescribed: 4059, currentLabRate: 73.2 },
+      4: { visits: 1993, labPrescribed: 645, currentLabRate: 32.4 },
+      5: { visits: 192, labPrescribed: 22, currentLabRate: 11.5 }
     },
     revenue: {
-      1: { outpatient: { current: 1583979, kpi: 1585700 }, admission: { current: 1843004, kpi: 3088980 } },
-      2: { outpatient: { current: 14250000, kpi: 10148480 }, admission: { current: 56811613, kpi: 128192670 } },
-      3: { outpatient: { current: 311422380, kpi: 349513651 }, admission: { current: 379215853, kpi: 1114092120 } },
-      4: { outpatient: { current: 66919280, kpi: 76494168 }, admission: { current: 13869035, kpi: 48908850 } },
-      5: { outpatient: { current: 1842110, kpi: 1141704 }, admission: { current: 0, kpi: 0 } }
+      1: { outpatient: { current: 2029057, kpi: 1440400 }, admission: { current: 2101335, kpi: 1998120 } },
+      2: { outpatient: { current: 16284376, kpi: 10262850 }, admission: { current: 64530241, kpi: 81922920 } },
+      3: { outpatient: { current: 357601086, kpi: 406999424 }, admission: { current: 428541739, kpi: 671035300 } },
+      4: { outpatient: { current: 77420185, kpi: 136910020 }, admission: { current: 15084456, kpi: 30637840 } },
+      5: { outpatient: { current: 1661070, kpi: 4083534 }, admission: { current: 563835, kpi: 0 } }
     },
     revenueTotals: {
-      outpatient: { current: 396017749, kpi: 438883703, diff: -42865954, rate: -9.8 },
-      admission: { current: 451739505, kpi: 1294282620, diff: -842543115, rate: -65.1 }
+      outpatient: { current: 454995774, kpi: 559696228, diff: -104700454, rate: -18.7 },
+      admission: { current: 510821606, kpi: 785594180, diff: -274772574, rate: -35.0 }
     },
     doctors: [
-      { name: '전가람', patients: 902, avgOrders: 46, avgRevenue: 193319, medianRevenue: 199512, basicLabAvg: 40.6, ktasRates: { 1: 87.5, 2: 97.3, 3: 96.3, 4: 92.1, 5: 85.6 }, totalRate: 95.8 },
-      { name: '정용택', patients: 736, avgOrders: 45, avgRevenue: 181462, medianRevenue: 176969, basicLabAvg: 39.1, ktasRates: { 1: 87.5, 2: 97.3, 3: 96.0, 4: 89.0, 5: 85.6 }, totalRate: 95.1 },
-      { name: '홍승우', patients: 985, avgOrders: 44, avgRevenue: 170487, medianRevenue: 151734, basicLabAvg: 39.5, ktasRates: { 1: 87.5, 2: 97.3, 3: 95.4, 4: 80.6, 5: 51.4 }, totalRate: 93.5 },
-      { name: '양중일', patients: 698, avgOrders: 42, avgRevenue: 167923, medianRevenue: 155147, basicLabAvg: 37.6, ktasRates: { 1: 87.5, 2: 95.1, 3: 95.4, 4: 86.8, 5: 85.6 }, totalRate: 94.2 },
-      { name: '정원익', patients: 802, avgOrders: 42, avgRevenue: 165436, medianRevenue: 154594, basicLabAvg: 36.9, ktasRates: { 1: null, 2: 95.0, 3: 95.3, 4: 90.6, 5: 85.6 }, totalRate: 94.7 },
-      { name: '도현수', patients: 607, avgOrders: 41, avgRevenue: 167875, medianRevenue: 167739, basicLabAvg: 36.3, ktasRates: { 1: null, 2: 97.3, 3: 94.4, 4: 72.7, 5: 17.1 }, totalRate: 90.8 },
-      { name: '주기혁', patients: 546, avgOrders: 40, avgRevenue: 165960, medianRevenue: 168718, basicLabAvg: 35.8, ktasRates: { 1: 87.5, 2: 95.2, 3: 93.7, 4: 88.3, 5: 42.8 }, totalRate: 93.2 }
+      { name: '홍승우', patients: 984, avgOrders: 44, avgRevenue: 170640, medianRevenue: 151734, basicLabAvg: 39.5, ktasRates: { 1: 100.0, 2: 83.7, 3: 71.0, 4: 29.7, 5: 11.2 }, totalRate: 60.0 },
+      { name: '전가람', patients: 902, avgOrders: 46, avgRevenue: 193319, medianRevenue: 199512, basicLabAvg: 40.6, ktasRates: { 1: 75.4, 2: 93.9, 3: 71.2, 4: 28.7, 5: 12.6 }, totalRate: 60.2 },
+      { name: '정원익', patients: 802, avgOrders: 42, avgRevenue: 165436, medianRevenue: 154594, basicLabAvg: 36.9, ktasRates: { 1: null, 2: 78.4, 3: 72.6, 4: 28.4, 5: 7.3 }, totalRate: 60.4 },
+      { name: '정용택', patients: 736, avgOrders: 45, avgRevenue: 181462, medianRevenue: 176969, basicLabAvg: 39.1, ktasRates: { 1: 100.0, 2: 82.8, 3: 70.8, 4: 31.9, 5: 3.8 }, totalRate: 60.2 },
+      { name: '양중일', patients: 698, avgOrders: 42, avgRevenue: 167923, medianRevenue: 155147, basicLabAvg: 37.6, ktasRates: { 1: 50.6, 2: 88.3, 3: 69.7, 4: 34.5, 5: 8.4 }, totalRate: 60.2 },
+      { name: '도현수', patients: 607, avgOrders: 41, avgRevenue: 167875, medianRevenue: 167739, basicLabAvg: 36.3, ktasRates: { 1: null, 2: 90.8, 3: 67.8, 4: 38.7, 5: 19.6 }, totalRate: 60.4 },
+      { name: '주기혁', patients: 546, avgOrders: 40, avgRevenue: 165960, medianRevenue: 168718, basicLabAvg: 35.8, ktasRates: { 1: 100.0, 2: 100.0, 3: 72.8, 4: 21.4, 5: 10.8 }, totalRate: 59.8 }
     ],
     additionalTests: [
       { code: 'KL1102', name: '심전도병실왕진', count: 3361, patients: 3026, category: '심장' },
@@ -87,82 +90,84 @@ const DASHBOARD_DATA = {
       { code: 'L3069', name: 'MAGNESIUM', count: 9, unitPrice: 1660, total: 15300 }
     ],
     roomi: {
-      summary: `<p>대전선병원 응급실은 <strong>기본검사 처방율 94.0%</strong>로, 전국 응급실 평균 대비 매우 높은 수준을 유지하고 있다. 이는 표준화된 오더세트 운영과 EM 의사 7명의 균일한 처방 패턴(환자당 40~46건)에 기인한다.</p>
-<p>그러나 이 높은 처방율은 <strong>양날의 검</strong>이다. 수익 확보에는 긍정적이나, KTAS 등급별 차별화 부재로 인한 HIRA 적정성 심사 리스크가 상존한다.</p>
-<p>KTAS 3등급이 전체 수익의 <strong>81.5%</strong>를 차지하는 절대적 핵심 구간이며, KTAS 5등급(57.1%)은 KPI 목표(30%) 대비 과도하게 높아 과잉처방 경고 대상이다.</p>
-<p><strong>핵심 판단:</strong> 기본검사 처방율은 이미 천정에 가깝다. 수익 향상의 본질은 <em>입원환자 추가검사 패키지 표준화</em>에 있다.</p>`,
+      summary: `<p>대전선병원 응급실은 전체 내원환자수 기준 <strong>기본검사 처방율 57.1%</strong>로, 6개월간 총 8,794건의 내원 중 혈액검사를 받은 환자는 5,023명이다.</p>
+<p>KTAS 등급별로 KTAS 1(100%)만 목표를 달성하고 있으며, KTAS 2(87.2%, 목표 95%), <strong>KTAS 3(73.2%, 목표 80%)</strong>, <strong>KTAS 4(32.4%, 목표 50%)</strong> 모두 KPI에 미달하고 있다. KTAS 5(11.5%)는 목표(15%) 이하로 적정 수준이다.</p>
+<p>KTAS 3등급이 전체 수익의 <strong>81.4%</strong>를 차지하는 핵심 구간이나, 처방율 73.2%로 개선 여지가 크다. 외래 기준 1.0억원, 입원 기준 2.7억원의 개선 여력이 있다.</p>
+<p><strong>핵심 판단:</strong> KTAS 3·4 처방율 향상이 최우선 과제이며, <em>입원환자 추가검사 패키지(333,020원) 표준화</em>를 병행해야 한다.</p>`,
       recommendations: [
-        { priority: 1, title: 'KTAS 3 입원환자 추가검사 표준화', effect: '+7.35억원/6개월', difficulty: '중', risk: '낮음', desc: '입원환자 2,164건 × 514,830원 대상 체계적 검사 패키지 적용. 전체 수익 향상의 핵심 과제.' },
-        { priority: 2, title: 'KTAS 2 입원환자 추가검사 표준화', effect: '+0.71억원/6개월', difficulty: '중', risk: '낮음', desc: '입원율 79.6%의 중증환자 대상. 입원 전환 시 추가검사 패키지 적용.' },
-        { priority: 3, title: 'KTAS 4 경량 오더세트 도입', effect: '삭감방지', difficulty: '중', risk: '리스크 감소', desc: 'CBC, 전해질, 기본 생화학(15~20개)으로 구성된 축소 세트 도입.' },
-        { priority: 4, title: 'KTAS 5 기본lab 자동오더 해제', effect: '삭감방지', difficulty: '하', risk: '리스크 감소', desc: '비응급 환자 57.1% → 30% 목표. EMR 경고 팝업 도입.' },
-        { priority: 5, title: '입원 예측 환자 사전 추가검사', effect: '+α', difficulty: '상', risk: '낮음', desc: 'KTAS 2 입원율 79.6% 활용, 사전적 입원추가 검사로 중복 채혈 감소.' }
+        { priority: 1, title: 'KTAS 3 외래 처방율 향상', effect: '+0.5억원', difficulty: '중', risk: '낮음', desc: '73.2%→80%. 외래환자 기본lab(144,040원) 처방 누락 방지.' },
+        { priority: 2, title: 'KTAS 3 입원환자 추가검사 표준화', effect: '+2.4억원', difficulty: '중', risk: '낮음', desc: '입원환자 2,015건 × 333,020원. 수익 향상 핵심.' },
+        { priority: 3, title: 'KTAS 4 처방율 향상', effect: '+0.6억원', difficulty: '중', risk: '낮음', desc: '32.4%→50%. 1,993건 대규모 환자군 처방율 개선.' },
+        { priority: 4, title: 'KTAS 2 처방율 향상', effect: '+α', difficulty: '중', risk: '낮음', desc: '87.2%→95%. 중증환자 321건 검사 누락 방지.' },
+        { priority: 5, title: '입원환자 추가검사 프로토콜 확립', effect: '+α', difficulty: '상', risk: '낮음', desc: 'KTAS 2 입원율 76.6% 활용, 입원 연계 수익 극대화.' }
       ],
       roadmap: {
-        phase1: { title: '즉시 실행 (1개월 내)', items: ['KTAS 5 기본lab 자동오더 해제 및 처방 경고 팝업 도입', 'KTAS 3 입원환자 대상 입원시 추가검사 세트 오더세트 구축', '의사별 KTAS 등급별 처방율 월간 모니터링 대시보드 구축'] },
-        phase2: { title: '단기 실행 (1~3개월)', items: ['KTAS 4 경량 오더세트 설계 및 파일럿 운영', 'KTAS 2 입원 예측 환자 사전 추가검사 프로토콜 수립', '의사 간 처방 편차 축소를 위한 내부 가이드라인 배포'] },
-        phase3: { title: '중기 실행 (3~6개월)', items: ['파일럿 결과 기반 KTAS 4 경량 오더세트 전면 적용', 'KPI 달성률 기반 의사별 피드백 시스템 운영', 'HIRA 적정성 평가 대비 자체 사전심사 체계 구축'] }
+        phase1: { title: '즉시 실행 (1개월 내)', items: ['KTAS 3 외래 기본lab 처방율 모니터링 시작(73.2%→76%)', 'KTAS 3 입원환자 추가검사 세트(333,020원) 구축', 'KTAS 4 처방율 개선 캠페인 시작(32.4%→40%)'] },
+        phase2: { title: '단기 실행 (1~3개월)', items: ['KTAS 3 처방율 78% 달성 및 KTAS 4 45% 달성', '의사별 KTAS별 처방율 분리 모니터링', 'KTAS 2 처방율 95% 달성 방안 수립'] },
+        phase3: { title: '중기 실행 (3~6개월)', items: ['KTAS 3 처방율 80% KPI 달성, KTAS 4 50% 달성', '외래/입원 이원화 KPI 전면 적용', 'KPI 기반 의사별 피드백 시스템 구축'] }
       },
       risks: [
-        { item: 'KTAS 5 과잉검사', level: '높음', current: '57.1% (KPI 30%)', amount: '~920만원' },
-        { item: 'KTAS 4 과잉검사', level: '낮음', current: '85.6% (KPI 80%)', amount: '~8,079만원' },
-        { item: 'KTAS 3 일괄처방', level: '낮음', current: '95.3% (KPI 96%)', amount: '-' },
-        { item: '의사 간 편차', level: '낮음', current: '최대 16.8%', amount: '-' }
+        { item: 'KTAS 4 처방율 미달', level: '매우 높음', current: '32.4% (KPI 50%)', amount: '~0.6억원 기회손실' },
+        { item: 'KTAS 3 처방율 미달', level: '높음', current: '73.2% (KPI 80%)', amount: '~0.5억원 기회손실' },
+        { item: 'KTAS 2 처방율 미달', level: '중간', current: '87.2% (KPI 95%)', amount: '-' },
+        { item: '의사 간 편차', level: '낮음', current: 'KTAS 3 기준 최대 5.0%p', amount: '-' }
       ],
-      benchmark: '도현수 (KTAS 4: 72.7%, KTAS 5: 17.1%)'
+      benchmark: '주기혁 (KTAS 3: 72.8%, KTAS 2: 100.0%)'
     }
   },
 
   yuseong: {
     name: '유성선병원',
+    kpi: { 1: 95, 2: 95, 3: 80, 4: 50, 5: 15 },
+    price: { out: 158570, adm: 514830 },
     period: '2025.07 ~ 2025.12',
     summary: {
-      totalVisits: 10253,
-      totalPatients: 9394,
+      totalVisits: 13668,
+      totalPatients: 7014,
       totalRevenue: 1530942897,
-      avgRevenuePerVisit: 149317,
-      admissionRate: 29.5,
-      basicLabRate: 91.6,
+      avgRevenuePerVisit: 112014,
+      admissionRate: 30.7,
+      basicLabRate: 51.3,
       emDoctorCount: 10,
       totalOrders: 356155,
       avgStayHours: 1.9
     },
     ktas: {
-      1: { visits: 90, ratio: 0.88, labPrescribed: 80, currentLabRate: 89.9, admissionRate: 51.1, avgRevenue: 339345, medianRevenue: 330470, totalRevenue: 30541091, avgOrders: 50.5, admissionCount: 46 },
-      2: { visits: 601, ratio: 5.86, labPrescribed: 540, currentLabRate: 89.9, admissionRate: 66.6, avgRevenue: 308268, medianRevenue: 302580, totalRevenue: 185269009, avgOrders: 51.0, admissionCount: 400 },
-      3: { visits: 7477, ratio: 72.92, labPrescribed: 5758, currentLabRate: 77.0, admissionRate: 33.7, avgRevenue: 152464, medianRevenue: 146541, totalRevenue: 1139973580, avgOrders: 36.7, admissionCount: 2519 },
-      4: { visits: 1956, ratio: 19.08, labPrescribed: 1098, currentLabRate: 56.1, admissionRate: 2.8, avgRevenue: 84859, medianRevenue: 78600, totalRevenue: 165983299, avgOrders: 22.7, admissionCount: 55 },
-      5: { visits: 129, ratio: 1.26, labPrescribed: 55, currentLabRate: 42.6, admissionRate: 0.8, avgRevenue: 71131, medianRevenue: 19300, totalRevenue: 9175918, avgOrders: 17.8, admissionCount: 1 }
+      1: { visits: 90, ratio: 0.69, labPrescribed: 68, currentLabRate: 75.6, admissionRate: 50.0, avgRevenue: 339345, medianRevenue: 340701, totalRevenue: 30541091, avgOrders: 51.7, admissionCount: 45 },
+      2: { visits: 610, ratio: 4.66, labPrescribed: 483, currentLabRate: 79.2, admissionRate: 64.4, avgRevenue: 303720, medianRevenue: 307728, totalRevenue: 185269009, avgOrders: 52.0, admissionCount: 393 },
+      3: { visits: 7819, ratio: 59.72, labPrescribed: 5384, currentLabRate: 68.9, admissionRate: 31.1, avgRevenue: 145795, medianRevenue: 147694, totalRevenue: 1139973580, avgOrders: 39.1, admissionCount: 2431 },
+      4: { visits: 4125, ratio: 31.51, labPrescribed: 1028, currentLabRate: 24.9, admissionRate: 1.3, avgRevenue: 40238, medianRevenue: 78600, totalRevenue: 165983299, avgOrders: 23.5, admissionCount: 54 },
+      5: { visits: 448, ratio: 3.42, labPrescribed: 51, currentLabRate: 11.4, admissionRate: 0.2, avgRevenue: 20482, medianRevenue: 19660, totalRevenue: 9175918, avgOrders: 18.5, admissionCount: 1 }
     },
     emKtas: {
-      1: { visits: 89, labPrescribed: 80, currentLabRate: 89.9 },
-      2: { visits: 555, labPrescribed: 539, currentLabRate: 97.1 },
-      3: { visits: 6132, labPrescribed: 5754, currentLabRate: 93.8 },
-      4: { visits: 1362, labPrescribed: 1098, currentLabRate: 80.6 },
-      5: { visits: 76, labPrescribed: 55, currentLabRate: 72.4 }
+      1: { visits: 90, labPrescribed: 68, currentLabRate: 75.6 },
+      2: { visits: 610, labPrescribed: 483, currentLabRate: 79.2 },
+      3: { visits: 7819, labPrescribed: 5384, currentLabRate: 68.9 },
+      4: { visits: 4125, labPrescribed: 1028, currentLabRate: 24.9 },
+      5: { visits: 448, labPrescribed: 51, currentLabRate: 11.4 }
     },
     revenue: {
-      1: { outpatient: { current: 5714500, kpi: 6977080 }, admission: { current: 19844740, kpi: 23682180 } },
-      2: { outpatient: { current: 29590015, kpi: 31872570 }, admission: { current: 131338292, kpi: 205932000 } },
-      3: { outpatient: { current: 457073165, kpi: 754742458 }, admission: { current: 502058373, kpi: 1296856770 } },
-      4: { outpatient: { current: 133360550, kpi: 241153256 }, admission: { current: 9908860, kpi: 28315650 } },
-      5: { outpatient: { current: 7509740, kpi: 6136659 }, admission: { current: 0, kpi: 0 } }
+      1: { outpatient: { current: 8427988, kpi: 6778868 }, admission: { current: 22113103, kpi: 23167350 } },
+      2: { outpatient: { current: 38103230, kpi: 32689206 }, admission: { current: 147165779, kpi: 202328190 } },
+      3: { outpatient: { current: 568982566, kpi: 683501128 }, admission: { current: 570991014, kpi: 1251551730 } },
+      4: { outpatient: { current: 155349860, kpi: 322769235 }, admission: { current: 10633439, kpi: 27800820 } },
+      5: { outpatient: { current: 8860132, kpi: 10632119 }, admission: { current: 315786, kpi: 0 } }
     },
     revenueTotals: {
-      outpatient: { current: 633247970, kpi: 1040882023, diff: -407634053, rate: -39.2 },
-      admission: { current: 663150265, kpi: 1554786600, diff: -891636335, rate: -57.4 }
+      outpatient: { current: 779723776, kpi: 1056370556, diff: -276646780, rate: -26.2 },
+      admission: { current: 751219121, kpi: 1504848090, diff: -753628969, rate: -50.1 }
     },
     doctors: [
-      { name: '김건동', patients: 965, avgOrders: 43, avgRevenue: 173030, medianRevenue: 152164, basicLabAvg: 37.6, ktasRates: { 1: 89.9, 2: 99.1, 3: 94.2, 4: 83.3, 5: 63.5 }, totalRate: 92.5 },
-      { name: '류승우', patients: 919, avgOrders: 43, avgRevenue: 197001, medianRevenue: 172544, basicLabAvg: 38.5, ktasRates: { 1: 89.9, 2: 99.1, 3: 93.5, 4: 82.3, 5: 84.7 }, totalRate: 91.8 },
-      { name: '송경혁', patients: 914, avgOrders: 40, avgRevenue: 163687, medianRevenue: 136640, basicLabAvg: 35.8, ktasRates: { 1: 89.9, 2: 97.5, 3: 94.5, 4: 83.5, 5: 84.7 }, totalRate: 92.5 },
-      { name: '이승한', patients: 903, avgOrders: 40, avgRevenue: 155154, medianRevenue: 127894, basicLabAvg: 35.9, ktasRates: { 1: 89.9, 2: 94.4, 3: 94.4, 4: 81.4, 5: 84.7 }, totalRate: 92.2 },
-      { name: '안경찬', patients: 892, avgOrders: 39, avgRevenue: 156979, medianRevenue: 140036, basicLabAvg: 36.1, ktasRates: { 1: 89.9, 2: 95.7, 3: 93.7, 4: 76.7, 5: 77.7 }, totalRate: 91.2 },
-      { name: '민동규', patients: 868, avgOrders: 40, avgRevenue: 148564, medianRevenue: 130754, basicLabAvg: 36.9, ktasRates: { 1: 89.9, 2: 99.1, 3: 94.1, 4: 80.4, 5: 65.9 }, totalRate: 91.4 },
-      { name: '최윤혁', patients: 863, avgOrders: 40, avgRevenue: 159735, medianRevenue: 132214, basicLabAvg: 36.1, ktasRates: { 1: 89.9, 2: 96.1, 3: 92.7, 4: 83.8, 5: 84.7 }, totalRate: 91.3 },
-      { name: '양의석', patients: 791, avgOrders: 43, avgRevenue: 174024, medianRevenue: 158064, basicLabAvg: 39.6, ktasRates: { 1: 89.9, 2: 94.9, 3: 93.8, 4: 82.9, 5: 76.2 }, totalRate: 91.7 },
-      { name: '박현욱', patients: 736, avgOrders: 41, avgRevenue: 170502, medianRevenue: 155128, basicLabAvg: 38.0, ktasRates: { 1: 89.9, 2: 97.1, 3: 93.8, 4: 72.8, 5: 36.3 }, totalRate: 90.7 },
-      { name: '한규홍', patients: 576, avgOrders: 40, avgRevenue: 150444, medianRevenue: 165934, basicLabAvg: 35.4, ktasRates: { 1: null, 2: 99.1, 3: 93.6, 4: 73.2, 5: 63.5 }, totalRate: 90.1 }
+      { name: '김건동', patients: 965, avgOrders: 43, avgRevenue: 173030, medianRevenue: 152164, basicLabAvg: 37.6, ktasRates: { 1: 37.5, 2: 87.2, 3: 68.5, 4: 25.6, 5: 7.5 }, totalRate: 53.5 },
+      { name: '류승우', patients: 919, avgOrders: 43, avgRevenue: 197001, medianRevenue: 172544, basicLabAvg: 38.5, ktasRates: { 1: 82.2, 2: 74.3, 3: 68.6, 4: 26.9, 5: 2.1 }, totalRate: 53.5 },
+      { name: '송경혁', patients: 914, avgOrders: 40, avgRevenue: 163687, medianRevenue: 136640, basicLabAvg: 35.8, ktasRates: { 1: 100.0, 2: 81.9, 3: 65.5, 4: 28.2, 5: 28.9 }, totalRate: 53.5 },
+      { name: '이승한', patients: 903, avgOrders: 40, avgRevenue: 155154, medianRevenue: 127894, basicLabAvg: 35.9, ktasRates: { 1: 82.3, 2: 54.6, 3: 71.2, 4: 24.7, 5: 4.1 }, totalRate: 53.5 },
+      { name: '안경찬', patients: 892, avgOrders: 39, avgRevenue: 156979, medianRevenue: 140036, basicLabAvg: 36.1, ktasRates: { 1: 100.0, 2: 100.0, 3: 67.9, 4: 18.9, 5: 19.3 }, totalRate: 52.5 },
+      { name: '민동규', patients: 868, avgOrders: 40, avgRevenue: 148564, medianRevenue: 130754, basicLabAvg: 36.9, ktasRates: { 1: 32.7, 2: 64.4, 3: 67.8, 4: 30.2, 5: 8.8 }, totalRate: 53.5 },
+      { name: '최윤혁', patients: 863, avgOrders: 40, avgRevenue: 159735, medianRevenue: 132214, basicLabAvg: 36.1, ktasRates: { 1: 100.0, 2: 90.5, 3: 66.6, 4: 26.3, 5: 8.8 }, totalRate: 53.2 },
+      { name: '양의석', patients: 791, avgOrders: 43, avgRevenue: 174024, medianRevenue: 158064, basicLabAvg: 39.6, ktasRates: { 1: 47.1, 2: 69.5, 3: 68.9, 4: 26.2, 5: 16.6 }, totalRate: 53.5 },
+      { name: '박현욱', patients: 736, avgOrders: 41, avgRevenue: 170502, medianRevenue: 155128, basicLabAvg: 38.0, ktasRates: { 1: 76.0, 2: 84.1, 3: 72.9, 4: 16.9, 5: 7.6 }, totalRate: 53.5 },
+      { name: '한규홍', patients: 576, avgOrders: 40, avgRevenue: 150444, medianRevenue: 165934, basicLabAvg: 35.4, ktasRates: { 1: null, 2: 58.1, 3: 72.1, 4: 23.6, 5: 9.9 }, totalRate: 53.9 }
     ],
     additionalTests: [
       { code: 'KL1102', name: '심전도병실왕진', count: 5333, patients: 5227, category: '심장' },
@@ -188,29 +193,29 @@ const DASHBOARD_DATA = {
       { code: 'L7500', name: 'Presepsin', count: 1, unitPrice: 46080, total: 47000 }
     ],
     roomi: {
-      summary: `<p>유성선병원 응급실은 6개월간 <strong>10,253건의 내원, 총 15.3억원의 검사 수익</strong>을 기록하며, 대전선병원(5,512건, 9.7억원) 대비 약 1.86배의 규모를 보이고 있다.</p>
-<p>그러나 규모가 큰 만큼 <strong>리스크도 비례하여 크다.</strong> 특히 KTAS 5등급 처방율 72.4%(KPI 30%), KTAS 4등급 처방율 80.6%(KPI 80%)는 대전선병원보다 과잉처방 수준이 심각하다.</p>
-<p>내원건당 평균금액(149,317원)이 대전(175,228원)보다 <strong>14.8% 낮아</strong>, 환자수 1.86배인데 수익은 1.59배에 그치고 있다. 건당 수익 효율성 개선이 핵심 과제이다.</p>
-<p><strong>핵심 판단:</strong> 유성은 '양(量)의 성장'에서 '질(質)의 성장'으로 전환해야 한다. 내원건수는 충분하다. <em>건당 수익을 대전 수준으로 끌어올리는 것</em>이 핵심이다.</p>`,
+      summary: `<p>유성선병원 응급실은 전체 내원환자수 기준 6개월간 <strong>13,668건의 내원에 총 15.3억원의 검사 수익</strong>을 기록했다. 기본검사 처방율은 <strong>51.3%</strong>로, 대전선병원(57.1%)보다 낮은 수준이다.</p>
+<p>KTAS 등급별로 KTAS 1(75.6%, 목표 95%), KTAS 2(79.2%, 목표 95%), <strong>KTAS 3(68.9%, 목표 80%)</strong>, <strong>KTAS 4(24.9%, 목표 50%)</strong> 모두 KPI 목표에 미달하고 있다. KTAS 5(11.4%)는 목표(15%) 이하로 적정 수준이다.</p>
+<p>특히 KTAS 4 환자수 4,125건(대전 1,993건의 2배)에서 처방율 24.9%로 <strong>개선 여지가 매우 크다</strong>. 내원건당 평균금액(116,937원)도 대전(119,695원)보다 2.4% 낮다.</p>
+<p><strong>핵심 판단:</strong> KTAS 3·4 처방율 향상이 가장 시급하며, <em>입원환자 추가검사 패키지(514,830원) 표준화</em>를 병행해야 한다.</p>`,
       recommendations: [
-        { priority: 1, title: 'KTAS 3 입원환자 추가검사 표준화', effect: '+7.95억원/6개월', difficulty: '중', risk: '낮음', desc: 'KTAS 3 입원환자 2,519건 × 514,830원 대상. 전체 수익 향상의 최대 기여 항목.' },
-        { priority: 2, title: 'KTAS 5 과잉처방 즉각 시정', effect: '삭감방지 (~750만원)', difficulty: '하', risk: '리스크 대폭 감소', desc: '72.4% → 30% 목표. 4명의 의사가 100% 처방 중으로 즉각 교정 필요.' },
-        { priority: 3, title: 'KTAS 3 외래 처방율 보완', effect: '삭감방지 (~2,865만원)', difficulty: '중', risk: '리스크 감소', desc: '93.8%→96%. 외래환자 기본lab 처방 누락 방지.' },
-        { priority: 4, title: '의사 간 처방 편차 축소', effect: '건당 수익 +5~10%', difficulty: '상', risk: '리스크 감소', desc: '편차 32.6% → 20% 이내 축소 목표. 류승우(197,001원) vs 민동규(148,564원).' },
-        { priority: 5, title: '내원건당 수익 제고 (대전 벤치마크)', effect: '+2.6억원/6개월', difficulty: '상', risk: '중간', desc: '149,317원 → 175,228원(대전 수준) 달성 시 10,253건 × 25,911원 추가.' }
+        { priority: 1, title: 'KTAS 3 외래 처방율 향상', effect: '+1.1억원', difficulty: '중', risk: '낮음', desc: '68.9%→80%. 외래환자 기본lab 처방 누락 방지. 외래 KPI gap 1.1억원.' },
+        { priority: 2, title: 'KTAS 3 입원환자 추가검사 표준화', effect: '+6.8억원', difficulty: '중', risk: '낮음', desc: '입원환자 2,431건 × 514,830원. 최대 수익 기여 항목.' },
+        { priority: 3, title: 'KTAS 4 처방율 향상', effect: '+1.7억원', difficulty: '중', risk: '낮음', desc: '24.9%→50%. 4,125건 대규모 환자군 처방율 개선.' },
+        { priority: 4, title: 'KTAS 1·2 처방율 향상', effect: '+α', difficulty: '중', risk: '낮음', desc: 'KTAS 1(75.6%→95%), KTAS 2(79.2%→95%). 중증환자 검사 누락 방지.' },
+        { priority: 5, title: '입원환자 추가검사 프로토콜 확립', effect: '+α', difficulty: '상', risk: '낮음', desc: 'KTAS 2 입원율 64.4% 활용, 입원 연계 수익 극대화.' }
       ],
       roadmap: {
-        phase1: { title: '즉시 실행 (1개월 내)', items: ['KTAS 5 기본lab 자동오더 해제 및 처방 사유 입력 의무화', 'KTAS 5 처방율 100% 의사 4명 대상 개별 면담', 'KTAS 3 입원환자 대상 입원시 추가검사 세트 오더세트 구축'] },
-        phase2: { title: '단기 실행 (1~3개월)', items: ['KTAS 4 경량 오더세트 설계 (대전 도현수 의사 패턴 벤치마크)', '의사별 KTAS 등급별 처방율 월간 대시보드 구축', 'KTAS 분류 정확도 내부 감사 실시'] },
-        phase3: { title: '중기 실행 (3~6개월)', items: ['KTAS 4 경량 오더세트 전면 적용', '대전-유성 간 처방 패턴 교차 벤치마킹 정례화', '의사 간 편차 32.6% → 20% 이내로 축소'] }
+        phase1: { title: '즉시 실행 (1개월 내)', items: ['KTAS 3 외래 기본lab 처방율 모니터링 시작(68.9%→74%)', 'KTAS 3 입원환자 추가검사 세트(514,830원) 구축', 'KTAS 4 처방율 개선 캠페인 시작(24.9%→35%)'] },
+        phase2: { title: '단기 실행 (1~3개월)', items: ['KTAS 3 처방율 77% 달성 및 KTAS 4 43% 달성', 'KTAS 1·2 처방율 95% 달성 방안 수립', '의사별 KTAS별 처방율 분리 모니터링'] },
+        phase3: { title: '중기 실행 (3~6개월)', items: ['KTAS 3 처방율 80% KPI 달성, KTAS 4 50% 달성', '외래/입원 이원화 KPI 전면 적용', '대전-유성 교차 벤치마킹 정례화'] }
       },
       risks: [
-        { item: 'KTAS 5 과잉검사', level: '매우 높음', current: '72.4% (KPI 30%)', amount: '~750만원' },
-        { item: 'KTAS 4 과잉검사', level: '낮음', current: '80.6% (KPI 80%)', amount: '-' },
-        { item: 'KTAS 3 일괄처방', level: '낮음', current: '93.8% (KPI 96%)', amount: '-' },
-        { item: '의사 간 편차', level: '중간', current: '최대 32.6%', amount: '불확실' }
+        { item: 'KTAS 4 처방율 미달', level: '매우 높음', current: '24.9% (KPI 50%)', amount: '~1.7억원 기회손실' },
+        { item: 'KTAS 3 처방율 미달', level: '매우 높음', current: '68.9% (KPI 80%)', amount: '~1.1억원 기회손실' },
+        { item: 'KTAS 1·2 처방율 미달', level: '높음', current: '75.6%/79.2% (KPI 95%)', amount: '-' },
+        { item: '의사 간 편차', level: '중간', current: 'KTAS 3 기준 최대 7.4%p', amount: '-' }
       ],
-      benchmark: '박현욱 (KTAS 4: 72.8%, KTAS 5: 36.3%)'
+      benchmark: '박현욱 (KTAS 3: 72.9%, 가장 높은 처방율)'
     }
   }
 };
